@@ -10,7 +10,7 @@ struct ApplicationParameters {
 }
 
 protocol FileRenderer {
-    func render(from template: String, parameters: [String: String]) -> String
+    func render(from template: String, name: String) -> String
 }
 
 protocol FileAdder {
@@ -24,6 +24,19 @@ protocol ProjectManipulator {
 enum ApplicationError: Error {
     case wrongGeneratorName(String)
     case missingFlowName
+}
+
+extension ApplicationError: Equatable {
+    public static func ==(lhs: ApplicationError, rhs: ApplicationError) -> Bool {
+        switch (lhs, rhs) {
+        case (.wrongGeneratorName(let lName), .wrongGeneratorName(let rName)):
+            return lName == rName
+        case (.missingFlowName, .missingFlowName):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 class Application {
@@ -47,17 +60,9 @@ class Application {
             return .failure(.missingFlowName)
         }
 
-        let connectorFile = fileRenderer.render(from: "connector_template_path", parameters: parameters.generatorParameters)
+        let connectorFile = fileRenderer.render(from: "connector_template_path", name: flowName)
         fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters["connector_directory"]!)
         projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters["target"]!)
-
-        let presenterFile = fileRenderer.render(from: "connector_template_path", parameters: parameters.generatorParameters)
-        fileAdder.addFile(with: flowName + "Presenter", content: presenterFile, to: parameters.generatorParameters["presenter_directory"]!)
-        projectManipulator.addToXCodeProject(file: presenterFile, target: parameters.generatorParameters["target"]!)
-
-        let viewControllerFile = fileRenderer.render(from: "view_controller_template_path", parameters: parameters.generatorParameters)
-        fileAdder.addFile(with: flowName + "ViewController", content: connectorFile, to: parameters.generatorParameters["view_controller_directory"]!)
-        projectManipulator.addToXCodeProject(file: viewControllerFile, target: parameters.generatorParameters["target"]!)
 
         return .success(())
     }
