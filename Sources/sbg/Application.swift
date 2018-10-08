@@ -6,7 +6,7 @@ import Foundation
 
 struct ApplicationParameters {
     let generatorName: String
-    let invocationParameters: [String: String]
+    let generatorParameters: [String: String]
 }
 
 protocol FileRenderer {
@@ -21,6 +21,10 @@ protocol ProjectManipulator {
     func addToXCodeProject(file: String, target: String)
 }
 
+enum ApplicationError: Error {
+    case wrongGeneratorName(String)
+}
+
 class Application {
 
     private let fileRenderer: FileRenderer
@@ -33,13 +37,15 @@ class Application {
         self.projectManipulator = projectManipulator
     }
 
-    func run(parameters: ApplicationParameters) {
+    func run(parameters: ApplicationParameters) -> Result<Void, ApplicationError> {
         guard parameters.generatorName == "cleanui" else {
-            fatalError("Unknown generator: \(parameters.generatorName)")
+            return .failure(.wrongGeneratorName(parameters.generatorName))
         }
 
-        let file = fileRenderer.render(from: "path_to_template", parameters: parameters.invocationParameters)
-        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
-        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
+        let file = fileRenderer.render(from: "path_to_template", parameters: parameters.generatorParameters)
+        fileAdder.addFile(with: "someName", content: file, to: parameters.generatorParameters["directory"]!)
+        projectManipulator.addToXCodeProject(file: file, target: parameters.generatorParameters["target"]!)
+
+        return .success(())
     }
 }
