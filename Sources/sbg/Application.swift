@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Stencil
 
 struct ApplicationParameters {
     let generatorName: String
@@ -10,7 +11,7 @@ struct ApplicationParameters {
 }
 
 protocol FileRenderer {
-    func render(from template: String, parameters: [String: String]) -> String
+    func render(from template: String, parameters: [String: String]) throws -> String
 }
 
 protocol FileAdder {
@@ -24,13 +25,13 @@ protocol ProjectManipulator {
 class Application {
 
     private let fileRenderer: FileRenderer
-    private let fileAdder: FileAdder
-    private let projectManipulator: ProjectManipulator
+//    private let fileAdder: FileAdder
+//    private let projectManipulator: ProjectManipulator
 
-    init(fileRenderer: FileRenderer, fileAdder: FileAdder, projectManipulator: ProjectManipulator) {
+    init(fileRenderer: FileRenderer) {//}, fileAdder: FileAdder, projectManipulator: ProjectManipulator) {
         self.fileRenderer = fileRenderer
-        self.fileAdder = fileAdder
-        self.projectManipulator = projectManipulator
+//        self.fileAdder = fileAdder
+//        self.projectManipulator = projectManipulator
     }
 
     func run(parameters: ApplicationParameters) {
@@ -38,8 +39,9 @@ class Application {
             fatalError("Unknown generator: \(parameters.generatorName)")
         }
 
-        let file = fileRenderer.render(from: "path_to_template", parameters: parameters.invocationParameters)
-        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
-        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
+        let file = try! fileRenderer.render(from: "template", parameters: parameters.invocationParameters)
+        print("FILE: \(file)")
+//        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
+//        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
     }
 }
