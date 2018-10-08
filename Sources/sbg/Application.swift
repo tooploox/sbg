@@ -23,6 +23,7 @@ protocol ProjectManipulator {
 
 enum ApplicationError: Error {
     case wrongGeneratorName(String)
+    case missingFlowName
 }
 
 class Application {
@@ -42,9 +43,21 @@ class Application {
             return .failure(.wrongGeneratorName(parameters.generatorName))
         }
 
-        let file = fileRenderer.render(from: "path_to_template", parameters: parameters.generatorParameters)
-        fileAdder.addFile(with: "someName", content: file, to: parameters.generatorParameters["directory"]!)
-        projectManipulator.addToXCodeProject(file: file, target: parameters.generatorParameters["target"]!)
+        guard let flowName = parameters.generatorParameters["flow_name"] else {
+            return .failure(.missingFlowName)
+        }
+
+        let connectorFile = fileRenderer.render(from: "connector_template_path", parameters: parameters.generatorParameters)
+        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters["connector_directory"]!)
+        projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters["target"]!)
+
+        let presenterFile = fileRenderer.render(from: "connector_template_path", parameters: parameters.generatorParameters)
+        fileAdder.addFile(with: flowName + "Presenter", content: presenterFile, to: parameters.generatorParameters["presenter_directory"]!)
+        projectManipulator.addToXCodeProject(file: presenterFile, target: parameters.generatorParameters["target"]!)
+
+        let viewControllerFile = fileRenderer.render(from: "view_controller_template_path", parameters: parameters.generatorParameters)
+        fileAdder.addFile(with: flowName + "ViewController", content: connectorFile, to: parameters.generatorParameters["view_controller_directory"]!)
+        projectManipulator.addToXCodeProject(file: viewControllerFile, target: parameters.generatorParameters["target"]!)
 
         return .success(())
     }
