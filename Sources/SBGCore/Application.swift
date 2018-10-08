@@ -4,11 +4,6 @@
 
 import Foundation
 
-struct ApplicationParameters {
-    let generatorName: String
-    let generatorParameters: [String: String]
-}
-
 protocol FileRenderer {
     func render(from template: String, name: String) -> String
 }
@@ -19,24 +14,6 @@ protocol FileAdder {
 
 protocol ProjectManipulator {
     func addToXCodeProject(file: String, target: String)
-}
-
-enum ApplicationError: Error {
-    case wrongGeneratorName(String)
-    case missingFlowName
-}
-
-extension ApplicationError: Equatable {
-    public static func ==(lhs: ApplicationError, rhs: ApplicationError) -> Bool {
-        switch (lhs, rhs) {
-        case (.wrongGeneratorName(let lName), .wrongGeneratorName(let rName)):
-            return lName == rName
-        case (.missingFlowName, .missingFlowName):
-            return true
-        default:
-            return false
-        }
-    }
 }
 
 class Application {
