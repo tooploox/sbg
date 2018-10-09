@@ -20,10 +20,10 @@ class Application {
 
     struct Constants {
         static let generatorName = "cleanmodule"
+        static let connectorTemplatePath = "connector_template_path"
 
         struct Keys {
             static let moduleName = "module_name"
-            static let connectorTemplatePath = "connector_template_path"
             static let connectorDirectoryPath = "connector_directory"
             static let target = "target"
         }
@@ -47,10 +47,18 @@ class Application {
         guard let flowName = parameters.generatorParameters[Constants.Keys.moduleName] else {
             return .failure(.missingFlowName)
         }
+        
+        guard let connectorDirectoryPath = parameters.generatorParameters[Constants.Keys.connectorDirectoryPath] else {
+            return .failure(.missingConnectorDirectoryPath)
+        }
 
-        let connectorFile = fileRenderer.render(from: Constants.Keys.connectorTemplatePath, name: flowName)
-        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters[Constants.Keys.connectorDirectoryPath]!)
-        projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters[Constants.Keys.target]!)
+        guard let target = parameters.generatorParameters[Constants.Keys.target] else {
+            return .failure(.missingTargetName)
+        }
+
+        let connectorFile = fileRenderer.render(from: Constants.connectorTemplatePath, name: flowName)
+        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
+        projectManipulator.addToXCodeProject(file: connectorFile, target: target)
 
         return .success(())
     }

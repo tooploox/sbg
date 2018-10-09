@@ -49,12 +49,47 @@ class ApplicationTests: QuickSpec {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
-                        generatorParameters: [:]
+                        generatorParameters: [
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
                     )
                 }
 
                 it("returns missingFlowName error") {
                     expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingFlowName))
+                }
+            }
+
+            context("when connector directory path parameter is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
+                    )
+                }
+
+                it("returns missingConnectorDirectoryPath error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingConnectorDirectoryPath))
+                }
+            }
+
+            context("when target parameter is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory
+                        ]
+                    )
+                }
+
+                it("returns missingTargetName error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTargetName))
                 }
             }
 
