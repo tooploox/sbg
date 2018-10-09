@@ -30,17 +30,19 @@ class Application {
         self.projectManipulator = projectManipulator
     }
 
-    func run(parameters: ApplicationParameters) {
+    func run(parameters: ApplicationParameters) -> Result<Void, ApplicationError> {
         guard parameters.generatorName == "cleanui" else {
-            fatalError("Unknown generator: \(parameters.generatorName)")
+            return .failure(.wrongGeneratorName(parameters.generatorName))
         }
 
-        guard let templateName = parameters.invocationParameters["template_name"] else {
-            fatalError("There is no template name in invokation parameters")
+        guard let flowName = parameters.generatorParameters["flow_name"] else {
+            return .failure(.missingFlowName)
         }
-        
-        let file = try! fileRenderer.renderTemplate(name: templateName, context: parameters.invocationParameters)
-        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
-        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
+
+        let connectorFile = fileRenderer.render(from: "connector_template_path", name: flowName)
+        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters["connector_directory"]!)
+        projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters["target"]!)
+
+        return .success(())
     }
 }
