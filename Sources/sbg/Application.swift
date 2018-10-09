@@ -10,10 +10,6 @@ struct ApplicationParameters {
     let invocationParameters: [String: String]
 }
 
-protocol FileRenderer {
-    func render(from template: String, parameters: [String: String]) throws -> String
-}
-
 protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String)
 }
@@ -25,13 +21,13 @@ protocol ProjectManipulator {
 class Application {
 
     private let fileRenderer: FileRenderer
-//    private let fileAdder: FileAdder
-//    private let projectManipulator: ProjectManipulator
+    private let fileAdder: FileAdder
+    private let projectManipulator: ProjectManipulator
 
-    init(fileRenderer: FileRenderer) {//}, fileAdder: FileAdder, projectManipulator: ProjectManipulator) {
+    init(fileRenderer: FileRenderer, fileAdder: FileAdder, projectManipulator: ProjectManipulator) {
         self.fileRenderer = fileRenderer
-//        self.fileAdder = fileAdder
-//        self.projectManipulator = projectManipulator
+        self.fileAdder = fileAdder
+        self.projectManipulator = projectManipulator
     }
 
     func run(parameters: ApplicationParameters) {
@@ -39,9 +35,12 @@ class Application {
             fatalError("Unknown generator: \(parameters.generatorName)")
         }
 
-        let file = try! fileRenderer.render(from: "template", parameters: parameters.invocationParameters)
-        print("FILE: \(file)")
-//        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
-//        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
+        guard let templateName = parameters.invocationParameters["template_name"] else {
+            fatalError("There is no template name in invokation parameters")
+        }
+        
+        let file = try! fileRenderer.renderTemplate(name: templateName, context: parameters.invocationParameters)
+        fileAdder.addFile(with: "someName", content: file, to: parameters.invocationParameters["directory"]!)
+        projectManipulator.addToXCodeProject(file: file, target: parameters.invocationParameters["target"]!)
     }
 }
