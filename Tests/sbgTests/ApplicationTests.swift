@@ -66,9 +66,9 @@ class ApplicationTests: QuickSpec {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
                         generatorParameters: [
-                            "flow_name": MockConstants.flowName,
-                            "connector_directory": MockConstants.connectorDirectory,
-                            "target": MockConstants.target
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target
                         ]
                     )
 
@@ -131,7 +131,7 @@ class ApplicationTests: QuickSpec {
 }
 
 private struct MockConstants {
-    static let correctName = "cleanui"
+    static let correctName = Application.Constants.generatorName
     static let wrongName = "wrongName"
     static let flowName = "sampleName"
 

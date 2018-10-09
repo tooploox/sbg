@@ -18,6 +18,17 @@ protocol ProjectManipulator {
 
 class Application {
 
+    struct Constants {
+        static let generatorName = "cleanmodule"
+
+        struct Keys {
+            static let moduleName = "module_name"
+            static let connectorTemplatePath = "connector_template_path"
+            static let connectorDirectoryPath = "connector_directory"
+            static let target = "target"
+        }
+    }
+
     private let fileRenderer: FileRenderer
     private let fileAdder: FileAdder
     private let projectManipulator: ProjectManipulator
@@ -29,17 +40,17 @@ class Application {
     }
 
     func run(parameters: ApplicationParameters) -> Result<Void, ApplicationError> {
-        guard parameters.generatorName == "cleanui" else {
+        guard parameters.generatorName == Constants.generatorName else {
             return .failure(.wrongGeneratorName(parameters.generatorName))
         }
 
-        guard let flowName = parameters.generatorParameters["flow_name"] else {
+        guard let flowName = parameters.generatorParameters[Constants.Keys.moduleName] else {
             return .failure(.missingFlowName)
         }
 
-        let connectorFile = fileRenderer.render(from: "connector_template_path", name: flowName)
-        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters["connector_directory"]!)
-        projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters["target"]!)
+        let connectorFile = fileRenderer.render(from: Constants.Keys.connectorTemplatePath, name: flowName)
+        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters[Constants.Keys.connectorDirectoryPath]!)
+        projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters[Constants.Keys.target]!)
 
         return .success(())
     }
