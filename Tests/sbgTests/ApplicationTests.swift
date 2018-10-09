@@ -30,6 +30,25 @@ class ApplicationTests: QuickSpec {
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
             }
+            
+            context("when rendering functions throws an error") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            "flow_name": MockConstants.flowName,
+                            "connector_directory": MockConstants.connectorDirectory,
+                            "target": MockConstants.target
+                        ]
+                    )
+
+                    fileRenderer.renderingError = MockError()
+                }
+                
+                it("returns couldNotRenderFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                }
+            }
 
             context("when generatorName is wrong") {
                 beforeEach {
@@ -83,10 +102,6 @@ class ApplicationTests: QuickSpec {
 
                     it("exactly once") {
                         expect(fileRenderer.invocationCount).to(equal(1))
-                    }
-
-                    it("with template equal to MockConstants.connectorTemplatePath") {
-                        expect(fileRenderer.template).to(equal(MockConstants.connectorTemplatePath))
                     }
 
                     it("name equal to MockConstants.flowName") {
@@ -146,16 +161,20 @@ private struct MockConstants {
 
 private class MockFileRenderer: FileRenderer {
 
-    private(set) var template: String!
     private(set) var name: String!
     private(set) var invocationCount = 0
 
+    var renderingError: Error?
     var returnedValue: String!
 
-    func render(from template: String, name: String) -> String {
-        self.template = template
+    func renderTemplate(name: String, context: [String : Any]?) throws -> String {
         self.name = name
         invocationCount += 1
+        
+        if let error = renderingError {
+            throw error
+        }
+        
         return returnedValue
     }
 }
@@ -187,3 +206,5 @@ private class MockProjectManipulator: ProjectManipulator {
         invocationCount += 1
     }
 }
+
+private class MockError: Error {}

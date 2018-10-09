@@ -5,11 +5,6 @@
 import Foundation
 import Stencil
 
-struct ApplicationParameters {
-    let generatorName: String
-    let invocationParameters: [String: String]
-}
-
 protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String)
 }
@@ -39,7 +34,10 @@ class Application {
             return .failure(.missingFlowName)
         }
 
-        let connectorFile = fileRenderer.render(from: "connector_template_path", name: flowName)
+        guard let connectorFile = try? fileRenderer.renderTemplate(name: flowName, context: parameters.generatorParameters) else {
+            return .failure(.couldNotRenderFile)
+        }
+        
         fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: parameters.generatorParameters["connector_directory"]!)
         projectManipulator.addToXCodeProject(file: connectorFile, target: parameters.generatorParameters["target"]!)
 
