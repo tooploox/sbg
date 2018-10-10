@@ -3,7 +3,10 @@
 //
 
 import Foundation
-import Stencil
+
+protocol FileRenderer {
+    func renderTemplate(name: String, context: [String: Any]?) throws -> String
+}
 
 protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String)
