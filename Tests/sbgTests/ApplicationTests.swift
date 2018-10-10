@@ -92,6 +92,45 @@ class ApplicationTests: QuickSpec {
                     expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTargetName))
                 }
             }
+            
+            context("when rendering functions throws an error") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
+                        ]
+                    )
+                    
+                    fileRenderer.renderingError = MockError()
+                }
+                
+                it("returns couldNotRenderFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                }
+            }
+            
+            context("when connector template path is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
+                    )
+                    
+                    fileRenderer.renderingError = MockError()
+                }
+                
+                it("returns missingTemplate error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTemplate))
+                }
+            }
 
             context("when parameters are correct") {
 
@@ -103,7 +142,8 @@ class ApplicationTests: QuickSpec {
                         generatorParameters: [
                             Application.Constants.Keys.moduleName: MockConstants.flowName,
                             Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
 
@@ -120,12 +160,8 @@ class ApplicationTests: QuickSpec {
                         expect(fileRenderer.invocationCount).to(equal(1))
                     }
 
-                    it("with template equal to MockConstants.connectorTemplatePath") {
-                        expect(fileRenderer.template).to(equal(MockConstants.connectorTemplatePath))
-                    }
-
-                    it("name equal to MockConstants.flowName") {
-                        expect(fileRenderer.name).to(equal(MockConstants.flowName))
+                    it("name equal to MockConstants.connectorTemplatePath") {
+                        expect(fileRenderer.name).to(equal(MockConstants.connectorTemplatePath))
                     }
                 }
 
@@ -169,6 +205,7 @@ private struct MockConstants {
     static let correctName = Application.Constants.generatorName
     static let wrongName = "wrongName"
     static let flowName = "sampleName"
+    static let modulerName = "sampleName"
 
     static let connectorTemplatePath = "connector_template_path"
     static let connectorDirectory = "connector_directory"
@@ -181,16 +218,20 @@ private struct MockConstants {
 
 private class MockFileRenderer: FileRenderer {
 
-    private(set) var template: String!
     private(set) var name: String!
     private(set) var invocationCount = 0
 
+    var renderingError: Error?
     var returnedValue: String!
 
-    func render(from template: String, name: String) -> String {
-        self.template = template
+    func renderTemplate(name: String, context: [String : Any]?) throws -> String {
         self.name = name
         invocationCount += 1
+        
+        if let error = renderingError {
+            throw error
+        }
+        
         return returnedValue
     }
 }
@@ -222,3 +263,5 @@ private class MockProjectManipulator: ProjectManipulator {
         invocationCount += 1
     }
 }
+
+private class MockError: Error {}

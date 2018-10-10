@@ -5,7 +5,7 @@
 import Foundation
 
 protocol FileRenderer {
-    func render(from template: String, name: String) -> String
+    func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
 protocol FileAdder {
@@ -55,8 +55,15 @@ class Application {
         guard let target = parameters.generatorParameters[Constants.Keys.target] else {
             return .failure(.missingTargetName)
         }
+        
+        guard let template = parameters.generatorParameters[Constants.connectorTemplatePath] else {
+            return .failure(.missingTemplate)
+        }
 
-        let connectorFile = fileRenderer.render(from: Constants.connectorTemplatePath, name: flowName)
+        guard let connectorFile = try? fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters) else {
+            return .failure(.couldNotRenderFile)
+        }
+        
         fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
         projectManipulator.addToXCodeProject(file: connectorFile, target: target)
 

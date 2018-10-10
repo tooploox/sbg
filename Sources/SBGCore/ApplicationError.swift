@@ -9,21 +9,8 @@ enum ApplicationError: Error {
     case missingFlowName
     case missingConnectorDirectoryPath
     case missingTargetName
+    case missingTemplate
+    case couldNotRenderFile
 }
 
-extension ApplicationError: Equatable {
-    public static func ==(lhs: ApplicationError, rhs: ApplicationError) -> Bool {
-        switch (lhs, rhs) {
-        case (.wrongGeneratorName(let lName), .wrongGeneratorName(let rName)):
-            return lName == rName
-        case (.missingFlowName, .missingFlowName):
-            return true
-        case (.missingConnectorDirectoryPath, .missingConnectorDirectoryPath):
-            return true
-        case (.missingTargetName, .missingTargetName):
-            return true
-        default:
-            return false
-        }
-    }
-}
+extension ApplicationError: Equatable {}
