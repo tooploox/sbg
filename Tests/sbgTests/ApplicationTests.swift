@@ -160,7 +160,7 @@ class ApplicationTests: QuickSpec {
                         expect(fileRenderer.invocationCount).to(equal(1))
                     }
 
-                    it("name equal to MockConstants.flowName") {
+                    it("name equal to MockConstants.connectorTemplatePath") {
                         expect(fileRenderer.name).to(equal(MockConstants.connectorTemplatePath))
                     }
                 }
