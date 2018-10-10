@@ -7,6 +7,9 @@ import Foundation
 enum ApplicationError: Error {
     case wrongGeneratorName(String)
     case missingFlowName
+    case missingConnectorDirectoryPath
+    case missingTargetName
+    case missingTemplate
     case couldNotRenderFile
 }
 

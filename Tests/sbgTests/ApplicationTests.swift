@@ -30,25 +30,6 @@ class ApplicationTests: QuickSpec {
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
             }
-            
-            context("when rendering functions throws an error") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            "flow_name": MockConstants.flowName,
-                            "connector_directory": MockConstants.connectorDirectory,
-                            "target": MockConstants.target
-                        ]
-                    )
-
-                    fileRenderer.renderingError = MockError()
-                }
-                
-                it("returns couldNotRenderFile error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
-                }
-            }
 
             context("when generatorName is wrong") {
                 beforeEach {
@@ -68,12 +49,86 @@ class ApplicationTests: QuickSpec {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
-                        generatorParameters: [:]
+                        generatorParameters: [
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
                     )
                 }
 
                 it("returns missingFlowName error") {
                     expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingFlowName))
+                }
+            }
+
+            context("when connector directory path parameter is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
+                    )
+                }
+
+                it("returns missingConnectorDirectoryPath error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingConnectorDirectoryPath))
+                }
+            }
+
+            context("when target parameter is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory
+                        ]
+                    )
+                }
+
+                it("returns missingTargetName error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTargetName))
+                }
+            }
+            
+            context("when rendering functions throws an error") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
+                        ]
+                    )
+                    
+                    fileRenderer.renderingError = MockError()
+                }
+                
+                it("returns couldNotRenderFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                }
+            }
+            
+            context("when connector template path is missing") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target
+                        ]
+                    )
+                    
+                    fileRenderer.renderingError = MockError()
+                }
+                
+                it("returns missingTemplate error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTemplate))
                 }
             }
 
@@ -85,9 +140,10 @@ class ApplicationTests: QuickSpec {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
                         generatorParameters: [
-                            "flow_name": MockConstants.flowName,
-                            "connector_directory": MockConstants.connectorDirectory,
-                            "target": MockConstants.target
+                            Application.Constants.Keys.moduleName: MockConstants.flowName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
 
@@ -105,7 +161,7 @@ class ApplicationTests: QuickSpec {
                     }
 
                     it("name equal to MockConstants.flowName") {
-                        expect(fileRenderer.name).to(equal(MockConstants.flowName))
+                        expect(fileRenderer.name).to(equal(MockConstants.connectorTemplatePath))
                     }
                 }
 
@@ -146,9 +202,10 @@ class ApplicationTests: QuickSpec {
 }
 
 private struct MockConstants {
-    static let correctName = "cleanui"
+    static let correctName = Application.Constants.generatorName
     static let wrongName = "wrongName"
     static let flowName = "sampleName"
+    static let modulerName = "sampleName"
 
     static let connectorTemplatePath = "connector_template_path"
     static let connectorDirectory = "connector_directory"
