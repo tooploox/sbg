@@ -13,10 +13,13 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "sbg",
+            name: "SBG",
+            dependencies: ["SBGCore"]),
+        .target(
+            name: "SBGCore",
             dependencies: ["Stencil", "xcodeproj"]),
         .testTarget(
-            name: "sbgTests",
-            dependencies: ["sbg", "Quick", "Nimble"]),
+            name: "SBGTests",
+            dependencies: ["SBGCore", "Quick", "Nimble"]),
     ]
 )
