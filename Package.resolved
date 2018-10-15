@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "AEXML",
-        "repositoryURL": "https://github.com/tadija/AEXML.git",
+        "repositoryURL": "https://github.com/tadija/AEXML",
         "state": {
           "branch": null,
-          "revision": "6eea665515d079c338690147082a8084a36484b0",
-          "version": "4.3.0"
+          "revision": "54bb8ea6fb693dd3f92a89e5fcc19e199fdeedd0",
+          "version": "4.3.3"
         }
       },
       {
@@ -56,12 +56,12 @@
         }
       },
       {
-        "package": "SwiftPM",
-        "repositoryURL": "https://github.com/apple/swift-package-manager",
+        "package": "SwiftShell",
+        "repositoryURL": "https://github.com/kareman/SwiftShell",
         "state": {
           "branch": null,
-          "revision": "6983434787dec4e543e9d398a0a9acf63ccd4da1",
-          "version": "0.2.1"
+          "revision": "beebe43c986d89ea5359ac3adcb42dac94e5e08a",
+          "version": "4.1.2"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj.git",
         "state": {
           "branch": null,
-          "revision": "1314329687682864119ecc03c73a413dfc24ade0",
-          "version": "6.0.1"
+          "revision": "869ae3f417b0fb545e454ead36e2e13f157265a2",
+          "version": "6.2.0"
         }
       }
     ]

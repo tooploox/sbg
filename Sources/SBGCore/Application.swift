@@ -4,19 +4,19 @@
 
 import Foundation
 
-protocol FileRenderer {
+public protocol FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
-protocol FileAdder {
+public protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String)
 }
 
-protocol ProjectManipulator {
-    func addToXCodeProject(file: String, target: String)
+public protocol ProjectManipulator {
+    func addToXCodeProject(filePath: String, target: String)
 }
 
-class Application {
+public class Application {
 
     struct Constants {
         static let generatorName = "cleanmodule"
@@ -65,7 +65,7 @@ class Application {
         }
         
         fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
-        projectManipulator.addToXCodeProject(file: connectorFile, target: target)
+        projectManipulator.addToXCodeProject(filePath: connectorFile, target: target)
 
         return .success(())
     }
