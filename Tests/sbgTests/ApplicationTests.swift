@@ -113,6 +113,26 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
+            context("when adding file function throws an error") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
+                        ]
+                    )
+                    
+                    fileAdder.addingError = MockError()
+                }
+                
+                it("returns couldNotAddFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotAddFile))
+                }
+            }
+            
             context("when connector template path is missing") {
                 beforeEach {
                     parameters = ApplicationParameters(
@@ -242,12 +262,18 @@ private class MockFileAdder: FileAdder {
     private(set) var content: String!
     private(set) var directory: String!
     private(set) var invocationCount = 0
+    
+    var addingError: Error?
 
-    func addFile(with name: String, content: String, to directory: String) {
+    func addFile(with name: String, content: String, to directory: String) throws {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
+        
+        if let error = addingError {
+            throw error
+        }
     }
 }
 

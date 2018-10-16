@@ -9,7 +9,7 @@ protocol FileRenderer {
 }
 
 protocol FileAdder {
-    func addFile(with name: String, content: String, to directory: String)
+    func addFile(with name: String, content: String, to directory: String) throws
 }
 
 protocol ProjectManipulator {
@@ -64,7 +64,12 @@ class Application {
             return .failure(.couldNotRenderFile)
         }
         
-        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
+        do {
+            try fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
+        } catch {
+            return .failure(.couldNotAddFile)
+        }
+        
         projectManipulator.addToXCodeProject(file: connectorFile, target: target)
 
         return .success(())
