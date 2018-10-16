@@ -189,7 +189,7 @@ class ApplicationTests: QuickSpec {
                     }
 
                     it("with file equal to MockConstants.fileRendererReturnedValue") {
-                        expect(projectManipulator.file).to(equal(MockConstants.fileRendererReturnedValue))
+                        expect(projectManipulator.filePath).to(equal(MockConstants.fileRendererReturnedValue))
                     }
 
                     it("with target equal to MockConstants.target") {
@@ -253,12 +253,12 @@ private class MockFileAdder: FileAdder {
 
 private class MockProjectManipulator: ProjectManipulator {
 
-    private(set) var file: String!
+    private(set) var filePath: String!
     private(set) var target: String!
     private(set) var invocationCount = 0
 
-    func addToXCodeProject(file: String, target: String) {
-        self.file = file
+    func addToXCodeProject(filePath: String, target: String) {
+        self.filePath = filePath
         self.target = target
         invocationCount += 1
     }

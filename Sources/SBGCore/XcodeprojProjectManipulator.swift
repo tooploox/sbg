@@ -12,7 +12,7 @@ public class XcodeprojProjectManipulator{
 
     }
 
-    public func addFileToXCodeProject(groupPath: String, fileName: String) {
+    public func addFileToXCodeProject(groupPath: String, fileName: String, target: String) {
         let fileManager = FileManager.default
 //        let currentPath = FileManager.default.currentDirectoryPath
         let projectPath = "/Users/karol/Documents/Praca/misc/TestApp/TestApp"
