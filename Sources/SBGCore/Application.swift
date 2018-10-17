@@ -82,7 +82,6 @@ public class Application {
             xcodeprojFile: "Some project file",
             target: target
         )
-//        projectManipulator.addToXCodeProject(filePath: connectorFile, target: target)
 
         return .success(())
     }
