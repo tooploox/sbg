@@ -18,15 +18,24 @@ class FoundationFileAdderTests: QuickSpec {
             
             var sut: FoundationFileAdder!
             var pathResolver: MockPathResolver!
+            var stringWriter: MockStringWriter!
+
+            var returnedValue: Result<Void, FileAdderError>!
             
             beforeEach {
                 pathResolver = MockPathResolver()
-                sut = FoundationFileAdder(pathResolver: pathResolver)
+                stringWriter = MockStringWriter()
+                sut = FoundationFileAdder(pathResolver: pathResolver, stringWriter: stringWriter)
             }
             
             context("when adding file") {
                 beforeEach {
-                    try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                    stringWriter.returnedValue = .success(())
+                    returnedValue = try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                }
+
+                it("returns success") {
+                    expect(returnedValue.value).to(beVoid())
                 }
                 
                 it("should invoke path resolver excactly once") {
@@ -43,6 +52,18 @@ class FoundationFileAdderTests: QuickSpec {
                 
                 it("should invoke path resolver with correct file extension") {
                     expect(pathResolver.fileExtension).to(equal(MockConstants.correctFileExtension))
+                }
+            }
+
+            context("when string writer returns error") {
+
+                beforeEach {
+                    stringWriter.returnedValue = .failure(.writingFailed(MockConstants.samplePath))
+                    returnedValue = try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                }
+
+                it("returns FileAdderError.writingFailed error") {
+                    expect(returnedValue.error).to(equal(FileAdderError.writingFailed(MockConstants.samplePath)))
                 }
             }
         }
@@ -73,5 +94,21 @@ private class MockPathResolver: PathResolver {
         self.fileExtension = fileExtension
         
         return MockConstants.samplePath
+    }
+}
+
+private class MockStringWriter: StringWriter {
+
+    private(set) var string: String!
+    private(set) var filePath: String!
+    private(set) var invocationCount = 0
+
+    var returnedValue: Result<Void, StringWriterError>!
+
+    func write(string: String, to filePath: String) -> Result<Void, StringWriterError> {
+        self.string = string
+        self.filePath = filePath
+        self.invocationCount += 1
+        return returnedValue
     }
 }

@@ -29,6 +29,7 @@ class ApplicationTests: QuickSpec {
                 )
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
+                fileAdder.returnedValue = .success(())
             }
 
             context("when generatorName is wrong") {
@@ -113,7 +114,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
-            context("when adding file function throws an error") {
+            context("when adding file function returns an error") {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
@@ -125,7 +126,7 @@ class ApplicationTests: QuickSpec {
                         ]
                     )
                     
-                    fileAdder.addingError = MockError()
+                    fileAdder.returnedValue = .failure(.writingFailed(MockConstants.fileAdderPath))
                 }
                 
                 it("returns couldNotAddFile error") {
@@ -234,6 +235,8 @@ private struct MockConstants {
     static let target = "Target"
 
     static let fileRendererReturnedValue = "Lorem ipsum..."
+
+    static let fileAdderPath = MockConstants.connectorDirectory + "/" + MockConstants.connectorName
 }
 
 private class MockFileRenderer: FileRenderer {
@@ -263,17 +266,15 @@ private class MockFileAdder: FileAdder {
     private(set) var directory: String!
     private(set) var invocationCount = 0
     
-    var addingError: Error?
+    var returnedValue: Result<Void, FileAdderError>!
 
-    func addFile(with name: String, content: String, to directory: String) throws {
+    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
-        
-        if let error = addingError {
-            throw error
-        }
+
+        return returnedValue
     }
 }
 
