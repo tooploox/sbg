@@ -29,6 +29,7 @@ class ApplicationTests: QuickSpec {
                 )
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
+                fileAdder.returnedValue = .success(())
             }
 
             context("when generatorName is wrong") {
@@ -93,7 +94,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
-            context("when rendering functions throws an error") {
+            context("when rendering fails") {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
@@ -110,6 +111,26 @@ class ApplicationTests: QuickSpec {
                 
                 it("returns couldNotRenderFile error") {
                     expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                }
+            }
+            
+            context("when adding file fails") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
+                        ]
+                    )
+                    
+                    fileAdder.returnedValue = .failure(.writingFailed(MockConstants.fileAdderPath))
+                }
+                
+                it("returns couldNotAddFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotAddFile))
                 }
             }
             
@@ -214,6 +235,8 @@ private struct MockConstants {
     static let target = "Target"
 
     static let fileRendererReturnedValue = "Lorem ipsum..."
+
+    static let fileAdderPath = MockConstants.connectorDirectory + "/" + MockConstants.connectorName
 }
 
 private class MockFileRenderer: FileRenderer {
@@ -242,12 +265,16 @@ private class MockFileAdder: FileAdder {
     private(set) var content: String!
     private(set) var directory: String!
     private(set) var invocationCount = 0
+    
+    var returnedValue: Result<Void, FileAdderError>!
 
-    func addFile(with name: String, content: String, to directory: String) {
+    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
+
+        return returnedValue
     }
 }
 

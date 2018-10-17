@@ -11,6 +11,7 @@ enum ApplicationError: Error {
     case missingTargetName
     case missingTemplate
     case couldNotRenderFile
+    case couldNotAddFile
 }
 
 extension ApplicationError: Equatable {}
