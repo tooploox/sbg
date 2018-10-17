@@ -29,6 +29,7 @@ class ApplicationTests: QuickSpec {
                 )
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
+                fileAdder.returnedValue = .success(())
             }
 
             context("when generatorName is wrong") {
@@ -93,7 +94,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
-            context("when rendering functions throws an error") {
+            context("when rendering fails") {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
@@ -110,6 +111,26 @@ class ApplicationTests: QuickSpec {
                 
                 it("returns couldNotRenderFile error") {
                     expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                }
+            }
+            
+            context("when adding file fails") {
+                beforeEach {
+                    parameters = ApplicationParameters(
+                        generatorName: MockConstants.correctName,
+                        generatorParameters: [
+                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
+                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
+                            Application.Constants.Keys.target: MockConstants.target,
+                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
+                        ]
+                    )
+                    
+                    fileAdder.returnedValue = .failure(.writingFailed(MockConstants.fileAdderPath))
+                }
+                
+                it("returns couldNotAddFile error") {
+                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotAddFile))
                 }
             }
             
@@ -146,6 +167,7 @@ class ApplicationTests: QuickSpec {
                             Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
+                    projectManipulator.returnedValue = .success(())
 
                     result = sut.run(parameters: parameters)
                 }
@@ -184,16 +206,25 @@ class ApplicationTests: QuickSpec {
                 }
 
                 context("invokes project manipulator") {
+                    // (groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String){
                     it("exactly once") {
                         expect(projectManipulator.invocationCount).to(equal(1))
                     }
 
-                    it("with file equal to MockConstants.fileRendererReturnedValue") {
-                        expect(projectManipulator.filePath).to(equal(MockConstants.fileRendererReturnedValue))
+                    it("with groupPath equal to MockConstants.connectorDirectory") {
+                        expect(projectManipulator.groupPath).to(equal(MockConstants.connectorDirectory))
+                    }
+
+                    it("with fileName equal to MockConstants.connectorName") {
+                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
+                    }
+
+                    it("with fileName equal to MockConstants.connectorName") {
+                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
                     }
 
                     it("with target equal to MockConstants.target") {
-                        expect(projectManipulator.target).to(equal(MockConstants.target))
+                        expect(projectManipulator.targetName).to(equal(MockConstants.target))
                     }
                 }
             }
@@ -214,6 +245,8 @@ private struct MockConstants {
     static let target = "Target"
 
     static let fileRendererReturnedValue = "Lorem ipsum..."
+
+    static let fileAdderPath = MockConstants.connectorDirectory + "/" + MockConstants.connectorName
 }
 
 private class MockFileRenderer: FileRenderer {
@@ -242,25 +275,39 @@ private class MockFileAdder: FileAdder {
     private(set) var content: String!
     private(set) var directory: String!
     private(set) var invocationCount = 0
+    
+    var returnedValue: Result<Void, FileAdderError>!
 
-    func addFile(with name: String, content: String, to directory: String) {
+    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
+
+        return returnedValue
     }
 }
 
 private class MockProjectManipulator: ProjectManipulator {
 
-    private(set) var filePath: String!
-    private(set) var target: String!
+    private(set) var groupPath: String!
+    private(set) var fileName: String!
+    private(set) var xcodeprojFile: String!
+    private(set) var targetName: String!
+
     private(set) var invocationCount = 0
 
-    func addToXCodeProject(filePath: String, target: String) {
-        self.filePath = filePath
-        self.target = target
+    var returnedValue: Result<Void, ProjectManipulatorError>!
+
+
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+        self.groupPath = groupPath
+        self.fileName = fileName
+        self.xcodeprojFile = xcodeprojFile
+        self.targetName = targetName
         invocationCount += 1
+
+        return returnedValue
     }
 }
 

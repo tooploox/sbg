@@ -8,8 +8,14 @@ import PathKit
 
 class XcodeprojProjectManipulator: ProjectManipulator {
 
+    private let pathResolver: PathResolver
+
+    init(pathResolver: PathResolver) {
+        self.pathResolver = pathResolver
+    }
+
     func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
-        let filePath = groupPath + "/" + fileName
+        let filePath = pathResolver.createFinalPath(from: groupPath, name: fileName, fileExtension: "swift")
 
         guard let xcodeproj = try? XcodeProj(pathString: xcodeprojFile) else {
             return .failure(.cannotOpenXcodeproj(xcodeprojFile))

@@ -8,8 +8,21 @@ public protocol FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
-public protocol FileAdder {
-    func addFile(with name: String, content: String, to directory: String)
+enum FileAdderError: Error {
+    case writingFailed(String)
+}
+
+extension FileAdderError: Equatable {
+    static func ==(lhs: FileAdderError, rhs: FileAdderError) -> Bool {
+        switch (lhs, rhs) {
+        case (.writingFailed(let lValue), .writingFailed(let rValue)):
+            return lValue == rValue
+        }
+    }
+}
+
+protocol FileAdder {
+    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError>
 }
 
 public protocol ProjectManipulator {
@@ -74,11 +87,14 @@ public class Application {
         guard let connectorFile = try? fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters) else {
             return .failure(.couldNotRenderFile)
         }
+
+        guard fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath).isSuccess else {
+            return .failure(.couldNotAddFile)
+        }
         
-        fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
         projectManipulator.addFileToXCodeProject(
             groupPath: Constants.Keys.connectorDirectoryPath,
-            fileName: flowName + "Connector.swift",
+            fileName: flowName + "Connector",
             xcodeprojFile: "Some project file",
             target: target
         )
