@@ -17,56 +17,55 @@ class PathResolverTests: QuickSpec {
         describe("PathResolver") {
             
             var sut: FoundationPathResolver!
+            var returnedPath: String!
             
             beforeEach {
                 sut = FoundationPathResolver()
             }
             
-            context("when directory does not end with `/` and file extension does not start with `.`") {
-                var returnedPath: String!
-                
-                beforeEach {
-                    returnedPath = sut.createFinalPath(from: MockConstants.directory, name: MockConstants.fileName, fileExtension: MockConstants.fileExtension)
+            context("when directory does not end with `/`") {
+
+                context("and file extension does not start with `.`") {
+                    beforeEach {
+                        returnedPath = sut.createFinalPath(from: MockConstants.directory, name: MockConstants.fileName, fileExtension: MockConstants.fileExtension)
+                    }
+
+                    it("returns correct path with appended `/` after directory and appended `.` before file extension") {
+                        expect(returnedPath).to(equal(MockConstants.correctPath))
+                    }
                 }
-                
-                it("should return correct path with appended `/` after directory and appended `.` before file extension") {
-                    expect(returnedPath).to(equal(MockConstants.correctPath))
-                }
-            }
-            
-            context("when directory ends with `/` and file extension does not start with `.`") {
-                var returnedPath: String!
-                
-                beforeEach {
-                    returnedPath = sut.createFinalPath(from: MockConstants.directory + "/", name: MockConstants.fileName, fileExtension: MockConstants.fileExtension)
-                }
-                
-                it("should return correct path with nothing added after directory and appended `.` before file extension") {
-                    expect(returnedPath).to(equal(MockConstants.correctPath))
-                }
-            }
-            
-            context("when directory does not end with `/` and file extension starts with `.`") {
-                var returnedPath: String!
-                
-                beforeEach {
-                    returnedPath = sut.createFinalPath(from: MockConstants.directory, name: MockConstants.fileName, fileExtension: "." + MockConstants.fileExtension)
-                }
-                
-                it("should return correct path with appended `/` after directory without adding `.` before file extension") {
-                    expect(returnedPath).to(equal(MockConstants.correctPath))
+
+                context("and file extension starts with `.`") {
+                    beforeEach {
+                        returnedPath = sut.createFinalPath(from: MockConstants.directory, name: MockConstants.fileName, fileExtension: "." + MockConstants.fileExtension)
+                    }
+
+                    it("returns correct path with appended `/` after directory without adding `.` before file extension") {
+                        expect(returnedPath).to(equal(MockConstants.correctPath))
+                    }
                 }
             }
             
-            context("when directory ends with `/` and file extension starts with `.`") {
-                var returnedPath: String!
-                
-                beforeEach {
-                    returnedPath = sut.createFinalPath(from: MockConstants.directory + "/", name: MockConstants.fileName, fileExtension: "." +  MockConstants.fileExtension)
+            context("when directory ends with `/` ") {
+
+                context("and file extension does not start with `.`") {
+                    beforeEach {
+                        returnedPath = sut.createFinalPath(from: MockConstants.directory + "/", name: MockConstants.fileName, fileExtension: MockConstants.fileExtension)
+                    }
+
+                    it("returns correct path with nothing added after directory and appended `.` before file extension") {
+                        expect(returnedPath).to(equal(MockConstants.correctPath))
+                    }
                 }
-                
-                it("should return correct path without appending `/` after directory and without adding `.` before file extension") {
-                    expect(returnedPath).to(equal(MockConstants.correctPath))
+
+                context("and file extension starts with `.`") {
+                    beforeEach {
+                        returnedPath = sut.createFinalPath(from: MockConstants.directory + "/", name: MockConstants.fileName, fileExtension: "." +  MockConstants.fileExtension)
+                    }
+
+                    it("returns correct path without appending `/` after directory and without adding `.` before file extension") {
+                        expect(returnedPath).to(equal(MockConstants.correctPath))
+                    }
                 }
             }
         }

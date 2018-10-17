@@ -28,42 +28,44 @@ class FoundationFileAdderTests: QuickSpec {
                 sut = FoundationFileAdder(pathResolver: pathResolver, stringWriter: stringWriter)
             }
             
-            context("when adding file") {
-                beforeEach {
-                    stringWriter.returnedValue = .success(())
-                    returnedValue = try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+            describe("adding file") {
+
+                context("stringWriter returnes success") {
+                    beforeEach {
+                        stringWriter.returnedValue = .success(())
+                        returnedValue = sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                    }
+
+                    it("returns success") {
+                        expect(returnedValue.value).to(beVoid())
+                    }
+
+                    it("invokes path resolver exactly once") {
+                        expect(pathResolver.invocationCount).to(equal(1))
+                    }
+
+                    it("invokes path resolver with correct file name") {
+                        expect(pathResolver.name).to(equal(MockConstants.sampleName))
+                    }
+
+                    it("invokes path resolver with correct directory") {
+                        expect(pathResolver.directory).to(equal(MockConstants.sampleDirectory))
+                    }
+
+                    it("invokes path resolver with correct file extension") {
+                        expect(pathResolver.fileExtension).to(equal(MockConstants.correctFileExtension))
+                    }
                 }
 
-                it("returns success") {
-                    expect(returnedValue.value).to(beVoid())
-                }
-                
-                it("should invoke path resolver excactly once") {
-                    expect(pathResolver.invocationCount).to(equal(1))
-                }
-                
-                it("should invoke path resolver with correct file name") {
-                    expect(pathResolver.name).to(equal(MockConstants.sampleName))
-                }
-                
-                it("should invoke path resolver with correct directory") {
-                    expect(pathResolver.directory).to(equal(MockConstants.sampleDirectory))
-                }
-                
-                it("should invoke path resolver with correct file extension") {
-                    expect(pathResolver.fileExtension).to(equal(MockConstants.correctFileExtension))
-                }
-            }
+                context("when string writer fails") {
+                    beforeEach {
+                        stringWriter.returnedValue = .failure(.writingFailed(MockConstants.samplePath))
+                        returnedValue = sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                    }
 
-            context("when string writer returns error") {
-
-                beforeEach {
-                    stringWriter.returnedValue = .failure(.writingFailed(MockConstants.samplePath))
-                    returnedValue = try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
-                }
-
-                it("returns FileAdderError.writingFailed error") {
-                    expect(returnedValue.error).to(equal(FileAdderError.writingFailed(MockConstants.samplePath)))
+                    it("returns FileAdderError.writingFailed error") {
+                        expect(returnedValue.error).to(equal(FileAdderError.writingFailed(MockConstants.samplePath)))
+                    }
                 }
             }
         }

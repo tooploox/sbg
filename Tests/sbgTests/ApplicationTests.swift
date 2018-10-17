@@ -94,7 +94,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
-            context("when rendering functions throws an error") {
+            context("when rendering fails") {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
@@ -114,7 +114,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
             
-            context("when adding file function returns an error") {
+            context("when adding file fails") {
                 beforeEach {
                     parameters = ApplicationParameters(
                         generatorName: MockConstants.correctName,
