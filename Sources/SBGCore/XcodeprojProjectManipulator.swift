@@ -6,38 +6,50 @@ import Foundation
 import xcodeproj
 import PathKit
 
-public class XcodeprojProjectManipulator{
+class XcodeprojProjectManipulator: ProjectManipulator {
 
-    public init() {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+        let filePath = groupPath + "/" + fileName
 
-    }
-
-    public func addFileToXCodeProject(groupPath: String, fileName: String, target: String) {
-        let fileManager = FileManager.default
-//        let currentPath = FileManager.default.currentDirectoryPath
-        let projectPath = "/Users/karol/Documents/Praca/misc/TestApp/TestApp"
-        let xcodeprojFile = try! fileManager.contentsOfDirectory(atPath: projectPath).filter { $0.contains(".xcodeproj") }.first!
-        let xcodeprojPath = projectPath + "/" + xcodeprojFile
-        let filePath = projectPath + "/" + groupPath + "/" + fileName
-
-        let xcodeproj = try! XcodeProj(pathString: xcodeprojPath)
-        let pbxproj = xcodeproj.pbxproj
-        let rootGroup = try! pbxproj.rootGroup()!
-
-        let groupPathComponents = groupPath.split(separator: "/").map(String.init)
-
-        let group = findGroup(withPath: ArraySlice(groupPathComponents), rootGroup: rootGroup)
-
-        do {
-            try group.addFile(at: Path(filePath), sourceTree: .group, sourceRoot: Path(projectPath))
-        } catch {
-            print(error)
+        guard let xcodeproj = try? XcodeProj(pathString: xcodeprojFile) else {
+            return .failure(.cannotOpenXcodeproj(xcodeprojFile))
         }
 
-        try! xcodeproj.write(path: Path(xcodeprojPath))
+        let pbxproj = xcodeproj.pbxproj
+
+        guard let rootGroup = (try? pbxproj.rootGroup()) as? PBXGroup else {
+            return .failure(.cannotFindRootGroup)
+        }
+
+        let groupPathComponents = ArraySlice(groupPath.split(separator: "/").map(String.init))
+        guard let group = findGroup(withPath: groupPathComponents, rootGroup: rootGroup) else {
+            return .failure(.cannotFindGroup(groupPath))
+        }
+
+        guard let fileReference = try? group.addFile(at: Path(filePath), sourceRoot: Path("")) else {
+            return .failure(.cannotAddFileToGroup(fileName, group.path!))
+        }
+
+        guard let target = pbxproj.targets(named: targetName).first else {
+            return .failure(.cannotFindTarget(targetName))
+        }
+
+        guard let buildPhase = (try? target.sourcesBuildPhase()) as? PBXSourcesBuildPhase else {
+            return .failure(.cannotGetSourcesBuildPhase)
+        }
+
+        guard let _ = try? buildPhase.add(file: fileReference) else {
+            return .failure(.cannotAddFileToSourcesBuildPhase(fileName))
+        }
+
+        guard let _ = try? xcodeproj.write(path: Path(xcodeprojFile)) else {
+            return .failure(.cannotWriteXcodeprojFile)
+        }
+
+        return .success(())
     }
 
-    private func findGroup(withPath path: ArraySlice<String>, rootGroup: PBXGroup) -> PBXGroup {
+    private func findGroup(withPath path: ArraySlice<String>, rootGroup: PBXGroup) -> PBXGroup? {
         guard let firstLevel = path.first else {
             return rootGroup
         }
@@ -48,6 +60,6 @@ public class XcodeprojProjectManipulator{
             }
         }
 
-        return rootGroup // TODO: Error handling
+        return nil
     }
 }

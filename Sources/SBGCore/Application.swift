@@ -13,7 +13,18 @@ public protocol FileAdder {
 }
 
 public protocol ProjectManipulator {
-    func addToXCodeProject(filePath: String, target: String)
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError>
+}
+
+public enum ProjectManipulatorError: Error {
+    case cannotOpenXcodeproj(String)
+    case cannotFindRootGroup
+    case cannotAddFileToGroup(String, String)
+    case cannotFindGroup(String)
+    case cannotFindTarget(String)
+    case cannotGetSourcesBuildPhase
+    case cannotAddFileToSourcesBuildPhase(String)
+    case cannotWriteXcodeprojFile
 }
 
 public class Application {
@@ -65,7 +76,13 @@ public class Application {
         }
         
         fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
-        projectManipulator.addToXCodeProject(filePath: connectorFile, target: target)
+        projectManipulator.addFileToXCodeProject(
+            groupPath: Constants.Keys.connectorDirectoryPath,
+            fileName: flowName + "Connector.swift",
+            xcodeprojFile: "Some project file",
+            target: target
+        )
+//        projectManipulator.addToXCodeProject(filePath: connectorFile, target: target)
 
         return .success(())
     }
