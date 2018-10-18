@@ -13,7 +13,7 @@ enum ConfigFileParserError: Error, Equatable {
     case cannotParseData(Data)
 }
 
-class FoundationConfigFileParser {
+class FoundationFileConfigProvider {
 
     private let fileReader: FileReader
 
@@ -21,7 +21,7 @@ class FoundationConfigFileParser {
         self.fileReader = fileReader
     }
 
-    func parse(file: String) -> Result<[String: String], ConfigFileParserError> {
+    func getConfiguration(from file: String) -> Result<[String: String], ConfigFileParserError> {
 
         guard let fileData = fileReader.read(file: file) else {
             return .failure(.cannotReadFile(file))

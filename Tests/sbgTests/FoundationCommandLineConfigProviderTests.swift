@@ -1,5 +1,5 @@
 //
-//  FoundationConfigCommandLineParserTests.swift
+//  FoundationCommandLineConfigProviderTests.swift
 //  AEXML
 //
 //  Created by Paweł Chmiel on 09/10/2018.
@@ -10,17 +10,17 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class CommandLineParserTests: QuickSpec {
+class FoundationCommandLineConfigProviderTests: QuickSpec {
     
     override func spec() {
         describe("Command line parameters") {
             
-            var sut: FoundationConfigCommandLineParser!
+            var sut: FoundationCommandLineConfigProvider!
             var commandLineParamsProvider: MockCommandLineParamsProvider!
 
             beforeEach {
                 commandLineParamsProvider = MockCommandLineParamsProvider()
-                sut = FoundationConfigCommandLineParser(commandLineArgsProvider: commandLineParamsProvider)
+                sut = FoundationCommandLineConfigProvider(commandLineArgsProvider: commandLineParamsProvider)
             }
 
             context("commandLine parameters are empty") {
@@ -29,7 +29,7 @@ class CommandLineParserTests: QuickSpec {
                 }
                 
                 it("returns an empty dictionary") {
-                    expect(sut.parse()).to(equal([:]))
+                    expect(sut.getConfiguration()).to(equal([:]))
                 }
             }
             
@@ -39,7 +39,7 @@ class CommandLineParserTests: QuickSpec {
                 }
                 
                 it("returns dictionary with one key and one value") {
-                    expect(sut.parse()).to(equal(["--config": "config.json"]))
+                    expect(sut.getConfiguration()).to(equal(["--config": "config.json"]))
                 }
             }
             
@@ -49,7 +49,7 @@ class CommandLineParserTests: QuickSpec {
                 }
                 
                 it("returns dictionary with parameters") {
-                    expect(sut.parse()).to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
+                    expect(sut.getConfiguration()).to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
                 }
             }
         }

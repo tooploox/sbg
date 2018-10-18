@@ -1,5 +1,5 @@
 //
-//  ConfigCommandLineParser.swift
+//  FoundationCommandLineConfigProvider.swift
 //
 //  Created by Paweł Chmiel on 12/10/2018.
 //
@@ -10,7 +10,7 @@ protocol CommandLineParamsProvider {
     var parameters: [String] { get }
 }
 
-final class FoundationConfigCommandLineParser {
+final class FoundationCommandLineConfigProvider {
 
     let commandLineParamsProvider: CommandLineParamsProvider
 
@@ -18,7 +18,7 @@ final class FoundationConfigCommandLineParser {
         self.commandLineParamsProvider = commandLineArgsProvider
     }
     
-    func parse() -> [String : String] {
+    func getConfiguration() -> [String : String] {
         let parameters = commandLineParamsProvider.parameters
 
         guard !parameters.isEmpty else { return [:] }

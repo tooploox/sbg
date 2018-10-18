@@ -7,17 +7,17 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class FoundationConfigFileParserTests: QuickSpec {
+class FoundationFileConfigProviderTests: QuickSpec {
 
     override func spec() {
         describe("FoundationFileAdder") {
 
             var fileReader: MockFileReader!
-            var sut: FoundationConfigFileParser!
+            var sut: FoundationFileConfigProvider!
 
             beforeEach {
                 fileReader = MockFileReader()
-                sut = FoundationConfigFileParser(fileReader: fileReader)
+                sut = FoundationFileConfigProvider(fileReader: fileReader)
             }
 
             context("when file contains correct data") {
@@ -26,7 +26,7 @@ class FoundationConfigFileParserTests: QuickSpec {
                 }
 
                 it("returns proper dictionary") {
-                    expect(sut.parse(file: MockConstants.file).value).to(equal(MockConstants.sampleDictionary))
+                    expect(sut.getConfiguration(from: MockConstants.file).value).to(equal(MockConstants.sampleDictionary))
                 }
             }
 
@@ -36,7 +36,7 @@ class FoundationConfigFileParserTests: QuickSpec {
                 }
 
                 it("returns cannotReadFile error") {
-                    let result = sut.parse(file: MockConstants.file)
+                    let result = sut.getConfiguration(from: MockConstants.file)
                     let expectedError = ConfigFileParserError.cannotReadFile(MockConstants.file)
                     expect(result.error).to(equal(expectedError))
                 }
@@ -48,7 +48,7 @@ class FoundationConfigFileParserTests: QuickSpec {
                 }
 
                 it("returns cannotParseData error") {
-                    let result = sut.parse(file: MockConstants.file)
+                    let result = sut.getConfiguration(from: MockConstants.file)
                     let expectedError = ConfigFileParserError.cannotParseData(MockConstants.malformedData)
                     expect(result.error).to(equal(expectedError))
                 }
