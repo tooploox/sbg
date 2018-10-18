@@ -206,7 +206,6 @@ class ApplicationTests: QuickSpec {
                 }
 
                 context("invokes project manipulator") {
-                    // (groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String){
                     it("exactly once") {
                         expect(projectManipulator.invocationCount).to(equal(1))
                     }
