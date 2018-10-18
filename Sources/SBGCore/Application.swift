@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol FileRenderer {
+public protocol FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
@@ -25,11 +25,22 @@ protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError>
 }
 
-protocol ProjectManipulator {
-    func addToXCodeProject(file: String, target: String)
+public protocol ProjectManipulator {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError>
 }
 
-class Application {
+public enum ProjectManipulatorError: Error {
+    case cannotOpenXcodeproj(String)
+    case cannotFindRootGroup
+    case cannotAddFileToGroup(String, String)
+    case cannotFindGroup(String)
+    case cannotFindTarget(String)
+    case cannotGetSourcesBuildPhase
+    case cannotAddFileToSourcesBuildPhase(String)
+    case cannotWriteXcodeprojFile
+}
+
+public class Application {
 
     struct Constants {
         static let generatorName = "cleanmodule"
@@ -81,7 +92,12 @@ class Application {
             return .failure(.couldNotAddFile)
         }
         
-        projectManipulator.addToXCodeProject(file: connectorFile, target: target)
+        projectManipulator.addFileToXCodeProject(
+            groupPath: Constants.Keys.connectorDirectoryPath,
+            fileName: flowName + "Connector",
+            xcodeprojFile: "Some project file",
+            target: target
+        )
 
         return .success(())
     }

@@ -167,6 +167,7 @@ class ApplicationTests: QuickSpec {
                             Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
+                    projectManipulator.returnedValue = .success(())
 
                     result = sut.run(parameters: parameters)
                 }
@@ -209,12 +210,20 @@ class ApplicationTests: QuickSpec {
                         expect(projectManipulator.invocationCount).to(equal(1))
                     }
 
-                    it("with file equal to MockConstants.fileRendererReturnedValue") {
-                        expect(projectManipulator.file).to(equal(MockConstants.fileRendererReturnedValue))
+                    it("with groupPath equal to MockConstants.connectorDirectory") {
+                        expect(projectManipulator.groupPath).to(equal(MockConstants.connectorDirectory))
+                    }
+
+                    it("with fileName equal to MockConstants.connectorName") {
+                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
+                    }
+
+                    it("with fileName equal to MockConstants.connectorName") {
+                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
                     }
 
                     it("with target equal to MockConstants.target") {
-                        expect(projectManipulator.target).to(equal(MockConstants.target))
+                        expect(projectManipulator.targetName).to(equal(MockConstants.target))
                     }
                 }
             }
@@ -280,14 +289,23 @@ private class MockFileAdder: FileAdder {
 
 private class MockProjectManipulator: ProjectManipulator {
 
-    private(set) var file: String!
-    private(set) var target: String!
+    private(set) var groupPath: String!
+    private(set) var fileName: String!
+    private(set) var xcodeprojFile: String!
+    private(set) var targetName: String!
+
     private(set) var invocationCount = 0
 
-    func addToXCodeProject(file: String, target: String) {
-        self.file = file
-        self.target = target
+    var returnedValue: Result<Void, ProjectManipulatorError>!
+
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+        self.groupPath = groupPath
+        self.fileName = fileName
+        self.xcodeprojFile = xcodeprojFile
+        self.targetName = targetName
         invocationCount += 1
+
+        return returnedValue
     }
 }
 
