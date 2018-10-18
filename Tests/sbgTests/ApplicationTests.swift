@@ -298,7 +298,6 @@ private class MockProjectManipulator: ProjectManipulator {
 
     var returnedValue: Result<Void, ProjectManipulatorError>!
 
-
     func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
         self.groupPath = groupPath
         self.fileName = fileName
