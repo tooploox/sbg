@@ -14,7 +14,7 @@ class MockFileReader: FileReader {
 
     func read(file: String) -> Data? {
         self.file = file
-        self.invocationCount += 1
+        invocationCount += 1
         return returnedValue
     }
 }
