@@ -10,7 +10,7 @@ protocol CommandLineParamsProvider {
     var parameters: [String] { get }
 }
 
-final class FoundationCommandLineConfigProvider {
+final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
 
     let commandLineParamsProvider: CommandLineParamsProvider
 

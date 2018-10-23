@@ -16,7 +16,7 @@ enum ConfigProviderError: Error, Equatable {
     case cannotReadConfigurationFromFile(String)
 }
 
-class ConfigProvider {
+final class ConfigProvider {
 
     class Constants {
         static let configFileName = "SBGConfig"
