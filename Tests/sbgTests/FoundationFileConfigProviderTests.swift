@@ -66,17 +66,3 @@ private struct MockConstants {
     static let malformedText = "{\"key\": \"value\""
     static let malformedData = MockConstants.malformedText.data(using: .utf8)!
 }
-
-private class MockFileReader: FileReader {
-
-    private(set) var file: String!
-    private(set) var invocationCount = 0
-
-    var returnedValue: Data!
-
-    func read(file: String) -> Data? {
-        self.file = file
-        self.invocationCount += 1
-        return returnedValue
-    }
-}
