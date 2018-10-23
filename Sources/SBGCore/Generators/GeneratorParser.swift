@@ -9,7 +9,7 @@ enum GeneratorParserError: Error, Equatable {
     case cannotParseData(String)
 }
 
-class GeneratorParser {
+final class GeneratorParser {
 
     private let fileReader: FileReader
 
