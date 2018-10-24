@@ -5,15 +5,21 @@
 import Foundation
 
 protocol CommandLineConfigProvider {
-    func getConfiguration() -> [String : String]
+    func getConfiguration() -> Result<CommandLineConfiguration, CommandLineConfigProviderError>
 }
 
 protocol FileConfigProvider {
     func getConfiguration(from file: String) -> Result<[String: String], ConfigFileParserError>
 }
 
+struct Configuration {
+    let commandName: String
+    let variables: [String : String]
+}
+
 enum ConfigProviderError: Error, Equatable {
     case cannotReadConfigurationFromFile(String)
+    case cannotReadCommandLineArguments
 }
 
 final class ConfigProvider {
@@ -30,17 +36,27 @@ final class ConfigProvider {
         self.fileConfigProvider = fileConfigProvider
     }
 
-    func getConfiguration() -> Result<[String: String], ConfigProviderError> {
+    func getConfiguration() -> Result<Configuration, ConfigProviderError> {
         let fileConfig = fileConfigProvider.getConfiguration(from: Constants.configFileName)
-        let commandLineConfig = commandLineConfigProvider.getConfiguration()
+        let commandLineConfigResult = commandLineConfigProvider.getConfiguration()
 
-        return fileConfig.ifSuccess { config in
-            var config = config
-            config.append(commandLineConfig)
-            return .success(config)
-        }.elseReturn { error in
-            return .failure(.cannotReadConfigurationFromFile(Constants.configFileName))
+        return commandLineConfigResult.ifSuccess { commandLineConfiguration in
+            return fileConfig.ifSuccess { fileConfiguration in
+                var variables = fileConfiguration
+                variables.append(commandLineConfiguration.variables)
+                
+                return .success(Configuration(
+                    commandName: commandLineConfiguration.commandName,
+                    variables: variables
+                ))
+            }.elseReturn { error in
+                    .failure(.cannotReadConfigurationFromFile(Constants.configFileName))
+            }
+        }.elseReturn { commandLineConfigProviderError in
+            return .failure(.cannotReadCommandLineArguments)
         }
+        
+        
     }
 }
 

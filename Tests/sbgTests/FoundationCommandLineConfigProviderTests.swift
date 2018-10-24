@@ -28,28 +28,48 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                     commandLineParamsProvider.parameters = []
                 }
                 
-                it("returns an empty dictionary") {
-                    expect(sut.getConfiguration()).to(equal([:]))
+                it("returns expected error") {
+                    let expectedError = CommandLineConfigProviderError.notEnoughArguments
+                    expect(sut.getConfiguration().error).to(equal(expectedError))
                 }
             }
             
-            context("commandLine parameters contains single parameter") {
+            context("commandLine parameters contains one argument") {
                 beforeEach {
-                    commandLineParamsProvider.parameters = ["--config", "config.json"]
+                    commandLineParamsProvider.parameters = ["some argument"] //["--config", "config.json"]
                 }
                 
-                it("returns dictionary with one key and one value") {
-                    expect(sut.getConfiguration()).to(equal(["--config": "config.json"]))
+                it("returns expected error") {
+                    let expectedError = CommandLineConfigProviderError.notEnoughArguments
+                    expect(sut.getConfiguration().error).to(equal(expectedError))
                 }
             }
             
-            context("commandLine parameters contains more parameters") {
+            context("commandLine parameters contains two arguments") {
                 beforeEach {
-                    commandLineParamsProvider.parameters = ["--config", "config.json", "--name", "Name", "--filePath", "filePath"]
+                    commandLineParamsProvider.parameters = ["executablePath", "commandName"]
                 }
                 
-                it("returns dictionary with parameters") {
-                    expect(sut.getConfiguration()).to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
+                it("returns configuration with correct command name") {
+                    expect(sut.getConfiguration().value?.commandName).to(equal("commandName"))
+                }
+
+                it("returns configuration with empty variables dictionary") {
+                    expect(sut.getConfiguration().value?.variables).to(beEmpty())
+                }
+            }
+            
+            context("commandLine parameters contains more than 2 parameters") {
+                beforeEach {
+                    commandLineParamsProvider.parameters = ["executablePath", "commandName", "--config", "config.json", "--name", "Name", "--filePath", "filePath"]
+                }
+                
+                it("returns configuration with correct command name") {
+                    expect(sut.getConfiguration().value?.commandName).to(equal("commandName"))
+                }
+                
+                it("returns expected variables") {
+                    expect(sut.getConfiguration().value?.variables).to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
                 }
             }
         }
