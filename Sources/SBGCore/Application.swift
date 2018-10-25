@@ -22,7 +22,7 @@ extension FileAdderError: Equatable {
 }
 
 protocol FileAdder {
-    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError>
+    func addFile(with name: String, content: String, to directory: String) throws
 }
 
 public protocol ProjectManipulator {
@@ -85,10 +85,7 @@ public class Application {
         }
 
         let connectorFile = try fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters)
-
-        guard fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath).isSuccess else {
-            throw ApplicationError.couldNotAddFile
-        }
+        try fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
         
         projectManipulator.addFileToXCodeProject(
             groupPath: Constants.Keys.connectorDirectoryPath,

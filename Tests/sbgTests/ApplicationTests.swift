@@ -29,7 +29,6 @@ class ApplicationTests: QuickSpec {
                 )
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
-                fileAdder.returnedValue = .success(())
             }
 
             context("when generatorName is wrong") {
@@ -127,11 +126,12 @@ class ApplicationTests: QuickSpec {
                         ]
                     )
                     
-                    fileAdder.returnedValue = .failure(.writingFailed(MockConstants.fileAdderPath))
+                    fileAdder.errorToThrow = FileAdderError.writingFailed(MockConstants.fileAdderPath)
                 }
                 
                 it("throws couldNotAddFile error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.couldNotAddFile))
+                    let expectedError = FileAdderError.writingFailed(MockConstants.fileAdderPath)
+                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
                 }
             }
             
@@ -270,15 +270,17 @@ private class MockFileAdder: FileAdder {
     private(set) var directory: String!
     private(set) var invocationCount = 0
     
-    var returnedValue: Result<Void, FileAdderError>!
+    var errorToThrow: Error?
 
-    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
+    func addFile(with name: String, content: String, to directory: String) throws {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
 
-        return returnedValue
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }
 

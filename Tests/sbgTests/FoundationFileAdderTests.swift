@@ -19,8 +19,6 @@ class FoundationFileAdderTests: QuickSpec {
             var sut: FoundationFileAdder!
             var pathResolver: MockPathResolver!
             var stringWriter: MockStringWriter!
-
-            var returnedValue: Result<Void, FileAdderError>!
             
             beforeEach {
                 pathResolver = MockPathResolver()
@@ -30,14 +28,10 @@ class FoundationFileAdderTests: QuickSpec {
             
             describe("adding file") {
 
-                context("stringWriter returnes success") {
+                context("stringWriter returns success") {
                     beforeEach {
                         stringWriter.returnedValue = .success(())
-                        returnedValue = sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
-                    }
-
-                    it("returns success") {
-                        expect(returnedValue.value).to(beVoid())
+                        try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
                     }
 
                     it("invokes path resolver exactly once") {
@@ -60,11 +54,12 @@ class FoundationFileAdderTests: QuickSpec {
                 context("when string writer fails") {
                     beforeEach {
                         stringWriter.returnedValue = .failure(.writingFailed(MockConstants.samplePath))
-                        returnedValue = sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
                     }
 
-                    it("returns FileAdderError.writingFailed error") {
-                        expect(returnedValue.error).to(equal(FileAdderError.writingFailed(MockConstants.samplePath)))
+                    it("throws FileAdderError.writingFailed error") {
+                        expect {
+                            try sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
+                        }.to(throwError(FileAdderError.writingFailed(MockConstants.samplePath)))
                     }
                 }
             }
