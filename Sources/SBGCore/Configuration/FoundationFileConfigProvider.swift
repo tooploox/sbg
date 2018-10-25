@@ -21,15 +21,15 @@ class FoundationFileConfigProvider: FileConfigProvider {
         self.fileReader = fileReader
     }
 
-    func getConfiguration(from file: String) -> Result<[String: String], ConfigFileParserError> {
+    func getConfiguration(from file: String) throws -> [String: String] {
         guard let fileData = fileReader.read(file: file) else {
-            return .failure(.cannotReadFile(file))
+            throw ConfigFileParserError.cannotReadFile(file)
         }
 
         guard let fileDictionary = (try? JSONSerialization.jsonObject(with: fileData)) as? [String: String] else {
-            return .failure(.cannotParseData(fileData))
+            throw ConfigFileParserError.cannotParseData(fileData)
         }
 
-        return .success(fileDictionary)
+        return fileDictionary
     }
 }

@@ -30,15 +30,15 @@ final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
         self.commandLineParamsProvider = commandLineArgsProvider
     }
     
-    func getConfiguration() -> Result<CommandLineConfiguration, CommandLineConfigProviderError> {
+    func getConfiguration() throws -> CommandLineConfiguration {
         let parameters = commandLineParamsProvider.parameters
 
         guard parameters.count >= minimumParametersCount else {
-            return .failure(.notEnoughArguments)
+            throw CommandLineConfigProviderError.notEnoughArguments
         }
 
         guard parameters.count % 2 == 0 else {
-            return .failure(.oddNumberOfArguments)
+            throw CommandLineConfigProviderError.oddNumberOfArguments
         }
         
         let commandName = parameters[1]
@@ -47,6 +47,6 @@ final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
             dictionary[parameters[index]] = parameters[index + 1]
         }
         
-        return .success(CommandLineConfiguration(commandName: commandName, variables: dictionary))
+        return CommandLineConfiguration(commandName: commandName, variables: dictionary)
     }
 }

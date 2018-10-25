@@ -30,7 +30,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 
                 it("returns expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
-                    expect(sut.getConfiguration().error).to(equal(expectedError))
+                    expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
             }
             
@@ -41,7 +41,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 
                 it("returns expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
-                    expect(sut.getConfiguration().error).to(equal(expectedError))
+                    expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
             }
 
@@ -52,7 +52,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
 
                 it("returns expected error") {
                     let expectedError = CommandLineConfigProviderError.oddNumberOfArguments
-                    expect(sut.getConfiguration().error).to(equal(expectedError))
+                    expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
             }
             
@@ -62,11 +62,11 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 }
                 
                 it("returns configuration with correct command name") {
-                    expect(sut.getConfiguration().value?.commandName).to(equal("commandName"))
+                    expect { try sut.getConfiguration().commandName }.to(equal("commandName"))
                 }
 
                 it("returns configuration with empty variables dictionary") {
-                    expect(sut.getConfiguration().value?.variables).to(beEmpty())
+                    expect { try sut.getConfiguration().variables }.to(beEmpty())
                 }
             }
             
@@ -76,11 +76,11 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 }
                 
                 it("returns configuration with correct command name") {
-                    expect(sut.getConfiguration().value?.commandName).to(equal("commandName"))
+                    expect { try sut.getConfiguration().commandName }.to(equal("commandName"))
                 }
                 
                 it("returns expected variables") {
-                    expect(sut.getConfiguration().value?.variables).to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
+                    expect { try sut.getConfiguration().variables }.to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
                 }
             }
         }
