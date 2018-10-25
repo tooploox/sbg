@@ -63,33 +63,33 @@ public class Application {
         self.projectManipulator = projectManipulator
     }
 
-    func run(parameters: ApplicationParameters) -> Result<Void, ApplicationError> {
+    func run(parameters: ApplicationParameters) throws {
         guard parameters.generatorName == Constants.generatorName else {
-            return .failure(.wrongGeneratorName(parameters.generatorName))
+            throw ApplicationError.wrongGeneratorName(parameters.generatorName)
         }
 
         guard let flowName = parameters.generatorParameters[Constants.Keys.moduleName] else {
-            return .failure(.missingFlowName)
+            throw ApplicationError.missingFlowName
         }
         
         guard let connectorDirectoryPath = parameters.generatorParameters[Constants.Keys.connectorDirectoryPath] else {
-            return .failure(.missingConnectorDirectoryPath)
+            throw ApplicationError.missingConnectorDirectoryPath
         }
 
         guard let target = parameters.generatorParameters[Constants.Keys.target] else {
-            return .failure(.missingTargetName)
+            throw ApplicationError.missingTargetName
         }
         
         guard let template = parameters.generatorParameters[Constants.connectorTemplatePath] else {
-            return .failure(.missingTemplate)
+            throw ApplicationError.missingTemplate
         }
 
         guard let connectorFile = try? fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters) else {
-            return .failure(.couldNotRenderFile)
+            throw ApplicationError.couldNotRenderFile
         }
 
         guard fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath).isSuccess else {
-            return .failure(.couldNotAddFile)
+            throw ApplicationError.couldNotAddFile
         }
         
         projectManipulator.addFileToXCodeProject(
@@ -98,7 +98,5 @@ public class Application {
             xcodeprojFile: "Some project file",
             target: target
         )
-
-        return .success(())
     }
 }
