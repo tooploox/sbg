@@ -7,12 +7,8 @@
 
 import Foundation
 
-enum StringWriterError: Error {
-    case writingFailed(String)
-}
-
 protocol StringWriter {
-    func write(string: String, to filePath: String) -> Result<Void, StringWriterError>
+    func write(string: String, to filePath: String) throws
 }
 
 final class FoundationFileAdder: FileAdder {
@@ -27,11 +23,6 @@ final class FoundationFileAdder: FileAdder {
 
     func addFile(with name: String, content: String, to directory: String) throws {
         let path = pathResolver.createFinalPath(from: directory, name: name, fileExtension: "swift")
-
-        if stringWriter.write(string: content, to: path).isSuccess {
-            return
-        } else {
-            throw FileAdderError.writingFailed(path)
-        }
+        try stringWriter.write(string: content, to: path)
     }
 }

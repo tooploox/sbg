@@ -305,5 +305,3 @@ private class MockProjectManipulator: ProjectManipulator {
         return returnedValue
     }
 }
-
-private class MockError: Error {}

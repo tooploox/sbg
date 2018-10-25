@@ -30,7 +30,6 @@ class FoundationFileAdderTests: QuickSpec {
 
                 context("stringWriter returns success") {
                     beforeEach {
-                        stringWriter.returnedValue = .success(())
                         try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
                     }
 
@@ -53,13 +52,17 @@ class FoundationFileAdderTests: QuickSpec {
 
                 context("when string writer fails") {
                     beforeEach {
-                        stringWriter.returnedValue = .failure(.writingFailed(MockConstants.samplePath))
+                        stringWriter.errorToThrow = MockError()
                     }
 
                     it("throws FileAdderError.writingFailed error") {
                         expect {
-                            try sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
-                        }.to(throwError(FileAdderError.writingFailed(MockConstants.samplePath)))
+                            try sut.addFile(
+                                with: MockConstants.sampleName,
+                                content: MockConstants.sampleContent,
+                                to: MockConstants.sampleDirectory
+                            )
+                        }.to(throwError(MockError()))
                     }
                 }
             }
@@ -100,12 +103,15 @@ private class MockStringWriter: StringWriter {
     private(set) var filePath: String!
     private(set) var invocationCount = 0
 
-    var returnedValue: Result<Void, StringWriterError>!
+    var errorToThrow: Error?
 
-    func write(string: String, to filePath: String) -> Result<Void, StringWriterError> {
+    func write(string: String, to filePath: String) throws {
         self.string = string
         self.filePath = filePath
         self.invocationCount += 1
-        return returnedValue
+
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }
