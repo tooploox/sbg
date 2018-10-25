@@ -110,8 +110,8 @@ class ApplicationTests: QuickSpec {
                     fileRenderer.renderingError = MockError()
                 }
                 
-                it("throws couldNotRenderFile error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.couldNotRenderFile))
+                it("throws error from renderer error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
                 }
             }
             

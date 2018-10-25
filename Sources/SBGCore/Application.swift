@@ -84,9 +84,7 @@ public class Application {
             throw ApplicationError.missingTemplate
         }
 
-        guard let connectorFile = try? fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters) else {
-            throw ApplicationError.couldNotRenderFile
-        }
+        let connectorFile = try fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters)
 
         guard fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath).isSuccess else {
             throw ApplicationError.couldNotAddFile
