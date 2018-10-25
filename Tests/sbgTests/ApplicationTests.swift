@@ -126,12 +126,11 @@ class ApplicationTests: QuickSpec {
                         ]
                     )
                     
-                    fileAdder.errorToThrow = FileAdderError.writingFailed(MockConstants.fileAdderPath)
+                    fileAdder.errorToThrow = MockError()
                 }
                 
                 it("throws couldNotAddFile error") {
-                    let expectedError = FileAdderError.writingFailed(MockConstants.fileAdderPath)
-                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
+                    expect { try sut.run(parameters: parameters) }.to(MockError())
                 }
             }
             

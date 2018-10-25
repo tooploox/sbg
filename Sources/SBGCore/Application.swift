@@ -8,19 +8,6 @@ public protocol FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
-enum FileAdderError: Error {
-    case writingFailed(String)
-}
-
-extension FileAdderError: Equatable {
-    static func ==(lhs: FileAdderError, rhs: FileAdderError) -> Bool {
-        switch (lhs, rhs) {
-        case (.writingFailed(let lValue), .writingFailed(let rValue)):
-            return lValue == rValue
-        }
-    }
-}
-
 protocol FileAdder {
     func addFile(with name: String, content: String, to directory: String) throws
 }
