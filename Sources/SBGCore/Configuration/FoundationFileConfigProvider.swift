@@ -5,7 +5,7 @@
 import Foundation
 
 protocol FileReader {
-    func read(file: String) -> Data?
+    func read(file: String) throws -> Data
 }
 
 enum ConfigFileParserError: Error, Equatable {
@@ -22,9 +22,7 @@ class FoundationFileConfigProvider: FileConfigProvider {
     }
 
     func getConfiguration(from file: String) throws -> [String: String] {
-        guard let fileData = fileReader.read(file: file) else {
-            throw ConfigFileParserError.cannotReadFile(file)
-        }
+        let fileData = try fileReader.read(file: file)
 
         guard let fileDictionary = (try? JSONSerialization.jsonObject(with: fileData)) as? [String: String] else {
             throw ConfigFileParserError.cannotParseData(fileData)

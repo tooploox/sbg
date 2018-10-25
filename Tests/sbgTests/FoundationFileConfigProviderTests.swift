@@ -32,12 +32,11 @@ class FoundationFileConfigProviderTests: QuickSpec {
 
             context("when reader cannot read file") {
                 beforeEach {
-                    fileReader.returnedValue = nil
+                    fileReader.errorToThrow = MockError()
                 }
 
                 it("throws cannotReadFile error") {
-                    let expectedError = ConfigFileParserError.cannotReadFile(MockConstants.file)
-                    expect { try sut.getConfiguration(from: MockConstants.file) }.to(throwError(expectedError))
+                    expect { try sut.getConfiguration(from: MockConstants.file) }.to(throwError(MockError()))
                 }
             }
 
