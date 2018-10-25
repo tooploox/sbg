@@ -32,10 +32,6 @@ class ApplicationTests: QuickSpec {
                 fileAdder.returnedValue = .success(())
             }
 
-            it("just fail to test ci") {
-                expect(true).to(beFalse())
-            }
-
             context("when generatorName is wrong") {
                 beforeEach {
                     parameters = ApplicationParameters(
