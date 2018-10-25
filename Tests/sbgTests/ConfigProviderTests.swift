@@ -28,16 +28,19 @@ class ConfigProviderTests: QuickSpec {
             context("when commandLineConfigProvider and fileConfigProvider return disjoint sets of params") {
 
                 beforeEach {
-                    commandLineConfigProvider.returnedValue = ["param1": "value1"]
+                    commandLineConfigProvider.returnedValue = .success(CommandLineConfiguration(
+                        commandName: "commandName",
+                        variables: ["param1": "value1"]
+                    ))
                     fileConfigProvider.returnedValue = .success(["param2": "value2"])
                 }
 
-                it("returns sum of this sets") {
+                it("returned variables are sum of this sets") {
                     let expectedResult = [
                         "param1": "value1",
                         "param2": "value2"
                     ]
-                    expect(sut.getConfiguration().value).to(equal(expectedResult))
+                    expect(sut.getConfiguration().value?.variables).to(equal(expectedResult))
                 }
             }
 
@@ -45,7 +48,10 @@ class ConfigProviderTests: QuickSpec {
 
                 beforeEach {
                     fileConfigProvider.returnedValue = .success(["param1": "A", "param2": "A"])
-                    commandLineConfigProvider.returnedValue = ["param2": "B", "param3": "B"]
+                    commandLineConfigProvider.returnedValue = .success(CommandLineConfiguration(
+                        commandName: "commandName",
+                        variables: ["param2": "B", "param3": "B"]
+                    ))
                 }
 
                 it("returns values from commandLineConfigProvider for repeated keys") {
@@ -54,7 +60,7 @@ class ConfigProviderTests: QuickSpec {
                         "param2": "B",
                         "param3": "B"
                     ]
-                    expect(sut.getConfiguration().value).to(equal(expectedResult))
+                    expect(sut.getConfiguration().value?.variables).to(equal(expectedResult))
                 }
             }
 
@@ -62,11 +68,28 @@ class ConfigProviderTests: QuickSpec {
 
                 beforeEach {
                     fileConfigProvider.returnedValue = .failure(.cannotReadFile(ConfigProvider.Constants.configFileName))
-                    commandLineConfigProvider.returnedValue = ["param2": "B", "param3": "B"]
+                    commandLineConfigProvider.returnedValue = .success(CommandLineConfiguration(
+                        commandName: "commandName",
+                        variables: ["param2": "B", "param3": "B"]
+                    ))
                 }
 
-                it("returns error") {
-                    expect(sut.getConfiguration().error).to(equal(.cannotReadConfigurationFromFile(ConfigProvider.Constants.configFileName)))
+                it("returns expected error") {
+                    let expectedError = ConfigProviderError.cannotReadConfigurationFromFile(ConfigProvider.Constants.configFileName)
+                    expect(sut.getConfiguration().error).to(equal(expectedError))
+                }
+            }
+            
+            context("when commandLineConfigProvider returns error") {
+                
+                beforeEach {
+                    fileConfigProvider.returnedValue = .success(["param1": "A", "param2": "A"])
+                    commandLineConfigProvider.returnedValue = .failure(.notEnoughArguments)
+                }
+                
+                it("returns expected error") {
+                    let expectedError = ConfigProviderError.cannotReadCommandLineArguments
+                    expect(sut.getConfiguration().error).to(equal(expectedError))
                 }
             }
         }
@@ -77,9 +100,9 @@ class MockCommandLineConfigProvider: CommandLineConfigProvider {
 
     private(set) var invocationCount = 0
 
-    var returnedValue: [String: String]!
+    var returnedValue: Result<CommandLineConfiguration, CommandLineConfigProviderError>!
 
-    func getConfiguration() -> [String: String] {
+    func getConfiguration() -> Result<CommandLineConfiguration, CommandLineConfigProviderError> {
         invocationCount += 1
         return returnedValue
     }
