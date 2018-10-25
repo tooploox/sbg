@@ -26,7 +26,7 @@ protocol FileAdder {
 }
 
 public protocol ProjectManipulator {
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError>
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws
 }
 
 public enum ProjectManipulatorError: Error {
@@ -87,7 +87,7 @@ public class Application {
         let connectorFile = try fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters)
         try fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
         
-        projectManipulator.addFileToXCodeProject(
+        try projectManipulator.addFileToXCodeProject(
             groupPath: Constants.Keys.connectorDirectoryPath,
             fileName: flowName + "Connector",
             xcodeprojFile: "Some project file",

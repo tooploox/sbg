@@ -166,7 +166,6 @@ class ApplicationTests: QuickSpec {
                             Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
-                    projectManipulator.returnedValue = .success(())
 
                     try! sut.run(parameters: parameters)
                 }
@@ -293,15 +292,17 @@ private class MockProjectManipulator: ProjectManipulator {
 
     private(set) var invocationCount = 0
 
-    var returnedValue: Result<Void, ProjectManipulatorError>!
+    var errorToThrow: Error?
 
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
         self.groupPath = groupPath
         self.fileName = fileName
         self.xcodeprojFile = xcodeprojFile
         self.targetName = targetName
         invocationCount += 1
 
-        return returnedValue
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }
