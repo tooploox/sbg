@@ -44,19 +44,17 @@ final class ConfigProvider {
             return fileConfig.ifSuccess { fileConfiguration in
                 var variables = fileConfiguration
                 variables.append(commandLineConfiguration.variables)
-                
+
                 return .success(Configuration(
                     commandName: commandLineConfiguration.commandName,
                     variables: variables
                 ))
             }.elseReturn { error in
-                    .failure(.cannotReadConfigurationFromFile(Constants.configFileName))
+                .failure(.cannotReadConfigurationFromFile(Constants.configFileName))
             }
         }.elseReturn { commandLineConfigProviderError in
             return .failure(.cannotReadCommandLineArguments)
         }
-        
-        
     }
 }
 

@@ -18,6 +18,7 @@ struct CommandLineConfiguration {
 
 enum CommandLineConfigProviderError: Error {
     case notEnoughArguments
+    case oddNumberOfArguments
 }
 
 final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
@@ -35,8 +36,12 @@ final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
         guard parameters.count >= minimumParametersCount else {
             return .failure(.notEnoughArguments)
         }
+
+        guard parameters.count % 2 == 0 else {
+            return .failure(.oddNumberOfArguments)
+        }
         
-        let commandName = parameters[minimumParametersCount-1]
+        let commandName = parameters[1]
         var dictionary = [String: String]()
         _ = stride(from: minimumParametersCount, to: parameters.count, by: 2).map { index in
             dictionary[parameters[index]] = parameters[index + 1]

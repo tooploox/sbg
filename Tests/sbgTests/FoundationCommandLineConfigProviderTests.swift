@@ -36,11 +36,22 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
             
             context("commandLine parameters contains one argument") {
                 beforeEach {
-                    commandLineParamsProvider.parameters = ["some argument"] //["--config", "config.json"]
+                    commandLineParamsProvider.parameters = ["some argument"]
                 }
                 
                 it("returns expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
+                    expect(sut.getConfiguration().error).to(equal(expectedError))
+                }
+            }
+
+            context("commandLine parameters contains odd number of arguments") {
+                beforeEach {
+                    commandLineParamsProvider.parameters = ["executablePath", "commandName", "--config", "config.json", "--name", "Name", "--filePath"]
+                }
+
+                it("returns expected error") {
+                    let expectedError = CommandLineConfigProviderError.oddNumberOfArguments
                     expect(sut.getConfiguration().error).to(equal(expectedError))
                 }
             }
