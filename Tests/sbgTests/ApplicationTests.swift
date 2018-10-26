@@ -268,25 +268,6 @@ private class MockFileRenderer: FileRenderer {
     }
 }
 
-private class MockFileAdder: FileAdder {
-
-    private(set) var name: String!
-    private(set) var content: String!
-    private(set) var directory: String!
-    private(set) var invocationCount = 0
-    
-    var returnedValue: Result<Void, FileAdderError>!
-
-    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
-        self.name = name
-        self.content = content
-        self.directory = directory
-        invocationCount += 1
-
-        return returnedValue
-    }
-}
-
 private class MockProjectManipulator: ProjectManipulator {
 
     private(set) var groupPath: String!
