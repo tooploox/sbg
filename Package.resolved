@@ -66,11 +66,11 @@
       },
       {
         "package": "xcodeproj",
-        "repositoryURL": "https://github.com/Vyeczorny/xcodeproj.git",
+        "repositoryURL": "https://github.com/tuist/xcodeproj.git",
         "state": {
-          "branch": "master",
-          "revision": "696b979140c12eb0fede7db7ab11a024d8ee811d",
-          "version": null
+          "branch": null,
+          "revision": "23da51abd3de3bedaad59a0afbb150b48504b5b0",
+          "version": "6.3.0"
         }
       }
     ]

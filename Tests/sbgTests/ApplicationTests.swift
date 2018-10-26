@@ -130,7 +130,7 @@ class ApplicationTests: QuickSpec {
                 }
                 
                 it("throws couldNotAddFile error") {
-                    expect { try sut.run(parameters: parameters) }.to(MockError())
+                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
                 }
             }
             
