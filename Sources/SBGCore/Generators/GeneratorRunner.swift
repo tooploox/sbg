@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import Stencil
 
 protocol StringRenderer {
     func render(string: String, context: [String: String]) throws -> String
