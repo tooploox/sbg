@@ -74,7 +74,7 @@ class ConfigProviderTests: QuickSpec {
                     )
                 }
 
-                it("returns expected error") {
+                it("throws expected error") {
                     let expectedError = ConfigFileParserError.cannotReadFile(ConfigProvider.Constants.configFileName)
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
@@ -87,7 +87,7 @@ class ConfigProviderTests: QuickSpec {
                     commandLineConfigProvider.errorToThrow = CommandLineConfigProviderError.notEnoughArguments
                 }
                 
-                it("returns expected error") {
+                it("throws expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }

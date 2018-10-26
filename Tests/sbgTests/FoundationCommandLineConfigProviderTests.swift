@@ -28,7 +28,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                     commandLineParamsProvider.parameters = []
                 }
                 
-                it("returns expected error") {
+                it("throws expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
@@ -39,7 +39,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                     commandLineParamsProvider.parameters = ["some argument"]
                 }
                 
-                it("returns expected error") {
+                it("throws expected error") {
                     let expectedError = CommandLineConfigProviderError.notEnoughArguments
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
@@ -50,7 +50,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                     commandLineParamsProvider.parameters = ["executablePath", "commandName", "--config", "config.json", "--name", "Name", "--filePath"]
                 }
 
-                it("returns expected error") {
+                it("throws expected error") {
                     let expectedError = CommandLineConfigProviderError.oddNumberOfArguments
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
@@ -74,7 +74,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 beforeEach {
                     commandLineParamsProvider.parameters = ["executablePath", "commandName", "--config", "config.json", "--name", "Name", "--filePath", "filePath"]
                 }
-                
+
                 it("returns configuration with correct command name") {
                     expect { try sut.getConfiguration().commandName }.to(equal("commandName"))
                 }
