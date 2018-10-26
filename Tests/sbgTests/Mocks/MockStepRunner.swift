@@ -7,16 +7,16 @@ import Foundation
 
 class MockStepRunner: StepRunner {
 
-    private(set) var step: Step!
-    private(set) var parameters: [String: String]!
+    private(set) var steps = [Step]()
+    private(set) var parametersArray = [[String: String]]()
 
     private(set) var invocationCount = 0
 
     var errorToThrow: Error?
 
     func run(step: Step, parameters: [String: String]) throws {
-        self.step = step
-        self.parameters = parameters
+        steps.append(step)
+        parametersArray.append(parameters)
 
         invocationCount += 1
 

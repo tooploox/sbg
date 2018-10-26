@@ -21,13 +21,86 @@ class GeneratorRunnerTests: QuickSpec {
             }
 
             context("when generator contains one step") {
+                var generator: Generator!
+                var parameters: [String: String]!
+
                 beforeEach {
-                    let generator = MockConstants.generator(withNumberOfSteps: 1)
-                    try! sut.run(generator: generator, parameters: [:])
+                    generator = MockConstants.generator(withNumberOfSteps: 1)
+                    parameters = [:]
+                    try! sut.run(generator: generator, parameters: parameters)
                 }
 
                 it("invokes stepRunner once") {
                     expect(stepRunner.invocationCount).to(equal(1))
+                }
+
+                it("invokes stepRunner with correct step") {
+                    expect(stepRunner.steps).to(equal(generator.steps))
+                }
+
+                it("invokes stepRunner with correct parameters") {
+                    expect(stepRunner.parametersArray.first).to(equal(parameters))
+                }
+            }
+
+            context("when generator contains more than one steps") {
+                var generator: Generator!
+                var parameters: [String: String]!
+
+                beforeEach {
+                    generator = MockConstants.generator(withNumberOfSteps: 3)
+                    parameters = [:]
+                    try! sut.run(generator: generator, parameters: parameters)
+                }
+
+                it("invokes stepRunner correct number of times") {
+                    expect(stepRunner.invocationCount).to(equal(3))
+                }
+
+                it("invokes stepRunner with correct step") {
+                    expect(stepRunner.steps).to(equal(generator.steps))
+                }
+
+                it("invokes stepRunner with correct parameters") {
+                    stepRunner.parametersArray.forEach { receivedParameters in
+                        expect(receivedParameters).to(equal(parameters))
+                    }
+                }
+            }
+
+            context("when generator contains zero steps") {
+                var generator: Generator!
+                var parameters: [String: String]!
+
+                beforeEach {
+                    generator = MockConstants.generator(withNumberOfSteps: 0)
+                    parameters = [:]
+                }
+
+                it("throws expected error") {
+                    let expectedError = GeneratorRunnerError.noStepsDefined
+                    expect {
+                        try sut.run(generator: generator, parameters: parameters)
+                    }
+                    .to(throwError(expectedError))
+                }
+            }
+
+            context("when stepRunner throws error") {
+                var generator: Generator!
+                var parameters: [String: String]!
+
+                beforeEach {
+                    stepRunner.errorToThrow = MockError()
+                    generator = MockConstants.generator(withNumberOfSteps: 3)
+                    parameters = [:]
+                }
+
+                it("throws expected error") {
+                    expect {
+                        try sut.run(generator: generator, parameters: parameters)
+                    }
+                    .to(throwError(MockError()))
                 }
             }
         }
