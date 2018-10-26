@@ -14,12 +14,15 @@ class MockStringWriter: StringWriter {
     private(set) var filePath: String!
     private(set) var invocationCount = 0
     
-    var returnedValue: Result<Void, StringWriterError>!
+    var errorToThrow: Error?
     
-    func write(string: String, to filePath: String) -> Result<Void, StringWriterError> {
+    func write(string: String, to filePath: String) throws {
         self.string = string
         self.filePath = filePath
         self.invocationCount += 1
-        return returnedValue
+
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }

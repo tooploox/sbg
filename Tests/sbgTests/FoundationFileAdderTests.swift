@@ -30,6 +30,7 @@ class FoundationFileAdderTests: QuickSpec {
 
                 context("stringWriter returns success") {
                     beforeEach {
+                        pathResolver.returnedValue = MockConstants.samplePath
                         try! sut.addFile(with: MockConstants.sampleName, content: MockConstants.sampleContent, to: MockConstants.sampleDirectory)
                     }
 
@@ -52,6 +53,7 @@ class FoundationFileAdderTests: QuickSpec {
 
                 context("when string writer fails") {
                     beforeEach {
+                        pathResolver.returnedValue = MockConstants.samplePath
                         stringWriter.errorToThrow = MockError()
                     }
 
@@ -76,42 +78,4 @@ private struct MockConstants {
     static let sampleContent = "sample_content"
     static let sampleDirectory = "sample_directory"
     static let samplePath = "sample_path"
-}
-
-private class MockPathResolver: PathResolver {
-    
-    private(set) var directory: String!
-    private(set) var name: String!
-    private(set) var fileExtension: String!
-    
-    private(set) var invocationCount = 0
-    
-    func createFinalPath(from directory: String, name: String, fileExtension: String) -> String {
-        invocationCount += 1
-        
-        self.directory = directory
-        self.name = name
-        self.fileExtension = fileExtension
-        
-        return MockConstants.samplePath
-    }
-}
-
-private class MockStringWriter: StringWriter {
-
-    private(set) var string: String!
-    private(set) var filePath: String!
-    private(set) var invocationCount = 0
-
-    var errorToThrow: Error?
-
-    func write(string: String, to filePath: String) throws {
-        self.string = string
-        self.filePath = filePath
-        self.invocationCount += 1
-
-        if let error = errorToThrow {
-            throw error
-        }
-    }
 }
