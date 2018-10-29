@@ -14,45 +14,35 @@ class XcodeprojProjectManipulator: ProjectManipulator {
         self.pathResolver = pathResolver
     }
 
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
         let filePath = pathResolver.createFinalPath(from: groupPath, name: fileName, fileExtension: "swift")
-
-        guard let xcodeproj = try? XcodeProj(pathString: xcodeprojFile) else {
-            return .failure(.cannotOpenXcodeproj(xcodeprojFile))
-        }
-
+        let xcodeproj = try XcodeProj(pathString: xcodeprojFile)
         let pbxproj = xcodeproj.pbxproj
 
-        guard let rootGroup = (try? pbxproj.rootGroup()) as? PBXGroup else {
-            return .failure(.cannotFindRootGroup)
+        let rootGroupOptional = try pbxproj.rootGroup()
+
+        guard let rootGroup = rootGroupOptional else {
+            throw ProjectManipulatorError.cannotFindRootGroup
         }
 
         let groupPathComponents = ArraySlice(groupPath.split(separator: "/").map(String.init))
         guard let group = findGroup(withPath: groupPathComponents, rootGroup: rootGroup) else {
-            return .failure(.cannotFindGroup(groupPath))
+            throw ProjectManipulatorError.cannotFindGroup(groupPath)
         }
 
-        guard let fileReference = try? group.addFile(at: Path(filePath), sourceRoot: Path("")) else {
-            return .failure(.cannotAddFileToGroup(fileName, group.path!))
-        }
+        let fileReference = try group.addFile(at: Path(filePath), sourceRoot: Path(""))
 
         guard let target = pbxproj.targets(named: targetName).first else {
-            return .failure(.cannotFindTarget(targetName))
+            throw ProjectManipulatorError.cannotFindTarget(targetName)
         }
 
-        guard let buildPhase = (try? target.sourcesBuildPhase()) as? PBXSourcesBuildPhase else {
-            return .failure(.cannotGetSourcesBuildPhase)
+        let buildPhaseOptional = try target.sourcesBuildPhase()
+        guard let buildPhase = buildPhaseOptional else {
+            throw ProjectManipulatorError.cannotGetSourcesBuildPhase
         }
 
-        guard let _ = try? buildPhase.add(file: fileReference) else {
-            return .failure(.cannotAddFileToSourcesBuildPhase(fileName))
-        }
-
-        guard let _ = try? xcodeproj.write(path: Path(xcodeprojFile)) else {
-            return .failure(.cannotWriteXcodeprojFile)
-        }
-
-        return .success(())
+        try buildPhase.add(file: fileReference)
+        try xcodeproj.write(path: Path(xcodeprojFile))
     }
 
     private func findGroup(withPath path: ArraySlice<String>, rootGroup: PBXGroup) -> PBXGroup? {

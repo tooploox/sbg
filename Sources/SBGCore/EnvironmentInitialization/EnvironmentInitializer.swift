@@ -13,7 +13,7 @@ enum SBGEnvironmentInitializerError: Error, Equatable {
 }
 
 protocol SBGEnvironmentInitializer {
-    func initializeEnvironment() -> Result<Void, SBGEnvironmentInitializerError>
+    func initializeEnvironment() throws
 }
 
 final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
@@ -26,19 +26,9 @@ final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
         self.fileAdder = fileAdder
     }
     
-    func initializeEnvironment() -> Result<Void, SBGEnvironmentInitializerError> {
-        guard directoryAdder.addDirectory(at: ".sbg/templates").isSuccess else {
-            return .failure(.couldNotInitializeDirectory(".sbg/templates"))
-        }
-        
-        guard directoryAdder.addDirectory(at: ".sbg/generators").isSuccess else {
-            return .failure(.couldNotInitializeDirectory(".sbg/generators"))
-        }
-        
-        guard fileAdder.addFile(with: "SBGFile", content: "", to: ".sbg").isSuccess else {
-            return .failure(.couldNotAddFile("SBGFile"))
-        }
-        
-        return .success(())
+    func initializeEnvironment() throws {
+        try directoryAdder.addDirectory(at: ".sbg/templates")
+        try directoryAdder.addDirectory(at: ".sbg/generators")
+        try fileAdder.addFile(with: "SBGFile", content: "", to: ".sbg")
     }
 }

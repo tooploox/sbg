@@ -5,11 +5,11 @@
 import Foundation
 
 protocol CommandLineConfigProvider {
-    func getConfiguration() -> Result<CommandLineConfiguration, CommandLineConfigProviderError>
+    func getConfiguration() throws -> CommandLineConfiguration
 }
 
 protocol FileConfigProvider {
-    func getConfiguration(from file: String) -> Result<[String: String], ConfigFileParserError>
+    func getConfiguration(from file: String) throws -> [String: String]
 }
 
 struct Configuration {
@@ -36,25 +36,17 @@ final class ConfigProvider {
         self.fileConfigProvider = fileConfigProvider
     }
 
-    func getConfiguration() -> Result<Configuration, ConfigProviderError> {
-        let fileConfig = fileConfigProvider.getConfiguration(from: Constants.configFileName)
-        let commandLineConfigResult = commandLineConfigProvider.getConfiguration()
+    func getConfiguration() throws -> Configuration {
+        let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFileName)
+        let commandLineConfig = try commandLineConfigProvider.getConfiguration()
 
-        return commandLineConfigResult.ifSuccess { commandLineConfiguration in
-            return fileConfig.ifSuccess { fileConfiguration in
-                var variables = fileConfiguration
-                variables.append(commandLineConfiguration.variables)
+        var variables = fileConfig
+        variables.append(commandLineConfig.variables)
 
-                return .success(Configuration(
-                    commandName: commandLineConfiguration.commandName,
-                    variables: variables
-                ))
-            }.elseReturn { error in
-                .failure(.cannotReadConfigurationFromFile(Constants.configFileName))
-            }
-        }.elseReturn { commandLineConfigProviderError in
-            return .failure(.cannotReadCommandLineArguments)
-        }
+        return Configuration(
+            commandName: commandLineConfig.commandName,
+            variables: variables
+        )
     }
 }
 

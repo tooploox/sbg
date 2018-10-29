@@ -29,7 +29,6 @@ class ApplicationTests: QuickSpec {
                 )
 
                 fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
-                fileAdder.returnedValue = .success(())
             }
 
             context("when generatorName is wrong") {
@@ -40,9 +39,9 @@ class ApplicationTests: QuickSpec {
                     )
                 }
 
-                it("returns wrongGeneratorName error") {
-                    expect(sut.run(parameters: parameters).error)
-                        .to(equal(ApplicationError.wrongGeneratorName(MockConstants.wrongName)))
+                it("throws wrongGeneratorName error") {
+                    let expectedError = ApplicationError.wrongGeneratorName(MockConstants.wrongName)
+                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
                 }
             }
 
@@ -57,8 +56,8 @@ class ApplicationTests: QuickSpec {
                     )
                 }
 
-                it("returns missingFlowName error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingFlowName))
+                it("throws missingFlowName error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingFlowName))
                 }
             }
 
@@ -73,8 +72,9 @@ class ApplicationTests: QuickSpec {
                     )
                 }
 
-                it("returns missingConnectorDirectoryPath error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingConnectorDirectoryPath))
+                it("throws missingConnectorDirectoryPath error") {
+                    let expectedError = ApplicationError.missingConnectorDirectoryPath
+                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
                 }
             }
 
@@ -89,8 +89,8 @@ class ApplicationTests: QuickSpec {
                     )
                 }
 
-                it("returns missingTargetName error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTargetName))
+                it("throws missingTargetName error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingTargetName))
                 }
             }
             
@@ -109,8 +109,8 @@ class ApplicationTests: QuickSpec {
                     fileRenderer.renderingError = MockError()
                 }
                 
-                it("returns couldNotRenderFile error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotRenderFile))
+                it("throws error from renderer error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
                 }
             }
             
@@ -126,11 +126,11 @@ class ApplicationTests: QuickSpec {
                         ]
                     )
                     
-                    fileAdder.returnedValue = .failure(.writingFailed(MockConstants.fileAdderPath))
+                    fileAdder.errorToThrow = MockError()
                 }
                 
-                it("returns couldNotAddFile error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.couldNotAddFile))
+                it("throws couldNotAddFile error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
                 }
             }
             
@@ -148,14 +148,12 @@ class ApplicationTests: QuickSpec {
                     fileRenderer.renderingError = MockError()
                 }
                 
-                it("returns missingTemplate error") {
-                    expect(sut.run(parameters: parameters).error).to(equal(ApplicationError.missingTemplate))
+                it("throws missingTemplate error") {
+                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingTemplate))
                 }
             }
 
             context("when parameters are correct") {
-
-                var result: Result<Void, ApplicationError>!
 
                 beforeEach {
                     parameters = ApplicationParameters(
@@ -167,13 +165,8 @@ class ApplicationTests: QuickSpec {
                             Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
                         ]
                     )
-                    projectManipulator.returnedValue = .success(())
 
-                    result = sut.run(parameters: parameters)
-                }
-
-                it("returns success") {
-                    expect(result.value).to(beVoid())
+                    try! sut.run(parameters: parameters)
                 }
 
                 context("invokes file renderer"){
@@ -277,17 +270,17 @@ private class MockProjectManipulator: ProjectManipulator {
 
     private(set) var invocationCount = 0
 
-    var returnedValue: Result<Void, ProjectManipulatorError>!
+    var errorToThrow: Error?
 
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError> {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
         self.groupPath = groupPath
         self.fileName = fileName
         self.xcodeprojFile = xcodeprojFile
         self.targetName = targetName
         invocationCount += 1
 
-        return returnedValue
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }
-
-private class MockError: Error {}

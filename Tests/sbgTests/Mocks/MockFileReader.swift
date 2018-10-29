@@ -10,11 +10,17 @@ class MockFileReader: FileReader {
     private(set) var file: String!
     private(set) var invocationCount = 0
 
-    var returnedValue: Data?
+    var errorToThrow: Error?
+    var returnedValue: Data!
 
-    func read(file: String) -> Data? {
+    func read(file: String) throws -> Data {
         self.file = file
         invocationCount += 1
+
+        if let error = errorToThrow {
+            throw error
+        }
+
         return returnedValue
     }
 }

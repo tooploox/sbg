@@ -26,19 +26,17 @@ class FoundationFileConfigProviderTests: QuickSpec {
                 }
 
                 it("returns proper dictionary") {
-                    expect(sut.getConfiguration(from: MockConstants.file).value).to(equal(MockConstants.sampleDictionary))
+                    expect { try sut.getConfiguration(from: MockConstants.file) }.to(equal(MockConstants.sampleDictionary))
                 }
             }
 
             context("when reader cannot read file") {
                 beforeEach {
-                    fileReader.returnedValue = nil
+                    fileReader.errorToThrow = MockError()
                 }
 
-                it("returns cannotReadFile error") {
-                    let result = sut.getConfiguration(from: MockConstants.file)
-                    let expectedError = ConfigFileParserError.cannotReadFile(MockConstants.file)
-                    expect(result.error).to(equal(expectedError))
+                it("throws cannotReadFile error") {
+                    expect { try sut.getConfiguration(from: MockConstants.file) }.to(throwError(MockError()))
                 }
             }
 
@@ -47,10 +45,9 @@ class FoundationFileConfigProviderTests: QuickSpec {
                     fileReader.returnedValue = MockConstants.malformedData
                 }
 
-                it("returns cannotParseData error") {
-                    let result = sut.getConfiguration(from: MockConstants.file)
+                it("throws cannotParseData error") {
                     let expectedError = ConfigFileParserError.cannotParseData(MockConstants.malformedData)
-                    expect(result.error).to(equal(expectedError))
+                    expect { try sut.getConfiguration(from: MockConstants.file) }.to(throwError(expectedError))
                 }
             }
 

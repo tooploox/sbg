@@ -14,15 +14,17 @@ class MockFileAdder: FileAdder {
     private(set) var content: String!
     private(set) var directory: String!
     private(set) var invocationCount = 0
+
+    var errorToThrow: Error?
     
-    var returnedValue: Result<Void, FileAdderError>!
-    
-    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError> {
+    func addFile(with name: String, content: String, to directory: String) throws {
         self.name = name
         self.content = content
         self.directory = directory
         invocationCount += 1
         
-        return returnedValue
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }

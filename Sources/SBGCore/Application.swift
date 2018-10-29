@@ -8,25 +8,12 @@ public protocol FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String
 }
 
-enum FileAdderError: Error {
-    case writingFailed(String)
-}
-
-extension FileAdderError: Equatable {
-    static func ==(lhs: FileAdderError, rhs: FileAdderError) -> Bool {
-        switch (lhs, rhs) {
-        case (.writingFailed(let lValue), .writingFailed(let rValue)):
-            return lValue == rValue
-        }
-    }
-}
-
 protocol FileAdder {
-    func addFile(with name: String, content: String, to directory: String) -> Result<Void, FileAdderError>
+    func addFile(with name: String, content: String, to directory: String) throws
 }
 
 public protocol ProjectManipulator {
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) -> Result<Void, ProjectManipulatorError>
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws
 }
 
 public enum ProjectManipulatorError: Error {
@@ -63,42 +50,35 @@ public class Application {
         self.projectManipulator = projectManipulator
     }
 
-    func run(parameters: ApplicationParameters) -> Result<Void, ApplicationError> {
+    func run(parameters: ApplicationParameters) throws {
         guard parameters.generatorName == Constants.generatorName else {
-            return .failure(.wrongGeneratorName(parameters.generatorName))
+            throw ApplicationError.wrongGeneratorName(parameters.generatorName)
         }
 
         guard let flowName = parameters.generatorParameters[Constants.Keys.moduleName] else {
-            return .failure(.missingFlowName)
+            throw ApplicationError.missingFlowName
         }
         
         guard let connectorDirectoryPath = parameters.generatorParameters[Constants.Keys.connectorDirectoryPath] else {
-            return .failure(.missingConnectorDirectoryPath)
+            throw ApplicationError.missingConnectorDirectoryPath
         }
 
         guard let target = parameters.generatorParameters[Constants.Keys.target] else {
-            return .failure(.missingTargetName)
+            throw ApplicationError.missingTargetName
         }
         
         guard let template = parameters.generatorParameters[Constants.connectorTemplatePath] else {
-            return .failure(.missingTemplate)
+            throw ApplicationError.missingTemplate
         }
 
-        guard let connectorFile = try? fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters) else {
-            return .failure(.couldNotRenderFile)
-        }
-
-        guard fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath).isSuccess else {
-            return .failure(.couldNotAddFile)
-        }
+        let connectorFile = try fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters)
+        try fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
         
-        projectManipulator.addFileToXCodeProject(
+        try projectManipulator.addFileToXCodeProject(
             groupPath: Constants.Keys.connectorDirectoryPath,
             fileName: flowName + "Connector",
             xcodeprojFile: "Some project file",
             target: target
         )
-
-        return .success(())
     }
 }

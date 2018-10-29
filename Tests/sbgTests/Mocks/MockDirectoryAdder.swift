@@ -12,13 +12,15 @@ class MockDirectoryAdder: DirectoryAdder {
     
     private(set) var path: String!
     private(set) var invocationCount = 0
-    var returnedValue: Result<Void, DirectoryAdderError>!
 
-    func addDirectory(at path: String) -> Result<Void, DirectoryAdderError> {
+    var errorToThrow: Error?
+
+    func addDirectory(at path: String) throws {
         invocationCount += 1
-        
         self.path = path
-        
-        return returnedValue
+
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }

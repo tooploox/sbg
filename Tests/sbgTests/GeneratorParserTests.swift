@@ -20,15 +20,13 @@ class GeneratorParserTests: QuickSpec {
                 sut = GeneratorParser(fileReader: fileReader)
             }
 
-            context("when file reader returns nil") {
+            context("when file reader throws error") {
                 beforeEach {
-                    fileReader.returnedValue = nil
+                    fileReader.errorToThrow = MockError()
                 }
 
                 it("returns expected error") {
-                    let result = sut.parse(fromFileAt: MockConstants.filePath)
-                    let expectedError = GeneratorParserError.cannotReadFile(MockConstants.filePath)
-                    expect(result.error).to(equal(expectedError))
+                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(MockError()))
                 }
             }
 
@@ -38,9 +36,8 @@ class GeneratorParserTests: QuickSpec {
                 }
 
                 it("returns expected error") {
-                    let result = sut.parse(fromFileAt: MockConstants.filePath)
                     let expectedError = GeneratorParserError.cannotParseData(MockConstants.filePath)
-                    expect(result.error).to(equal(expectedError))
+                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(expectedError))
                 }
             }
 
@@ -50,7 +47,6 @@ class GeneratorParserTests: QuickSpec {
                 }
 
                 it("returns parsed generator") {
-                    let result = sut.parse(fromFileAt: MockConstants.filePath)
                     let expectedGenerator = Generator(
                         name: "clean_module",
                         steps: [
@@ -62,7 +58,7 @@ class GeneratorParserTests: QuickSpec {
                             )
                         ]
                     )
-                    expect(result.value).to(equal(expectedGenerator))
+                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(equal(expectedGenerator))
                 }
             }
         }

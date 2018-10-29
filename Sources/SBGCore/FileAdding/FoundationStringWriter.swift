@@ -5,12 +5,7 @@
 import Foundation
 
 class FoundationStringWriter: StringWriter {
-    func write(string: String, to filePath: String) -> Result<Void, StringWriterError> {
-        do {
-            try string.write(toFile: filePath, atomically: false, encoding: .utf8)
-            return .success(())
-        } catch {
-            return .failure(.writingFailed(error.localizedDescription))
-        }
+    func write(string: String, to filePath: String) throws {
+        try string.write(toFile: filePath, atomically: false, encoding: .utf8)
     }
 }

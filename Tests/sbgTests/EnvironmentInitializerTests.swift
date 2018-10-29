@@ -26,45 +26,28 @@ class SBGEnvironmentInitializerTests: QuickSpec {
             }
             
             context("when directory adding and file adding succeeds") {
-                var result: Result<Void, SBGEnvironmentInitializerError>!
-                
-                beforeEach {
-                    directoryAdder.returnedValue = .success(())
-                    fileAdder.returnedValue = .success(())
-
-                    result = sut.initializeEnvironment()
-                }
-                
                 it("returns success result") {
-                    expect(result.value).to(beVoid())
+                    expect { try sut.initializeEnvironment() }.to(beVoid())
                 }
             }
             
             context("when directory adding fails") {
-                var result: Result<Void, SBGEnvironmentInitializerError>!
-                
                 beforeEach {
-                    directoryAdder.returnedValue = .failure(DirectoryAdderError.couldNotAddDirectory("sample_directory"))
-                    fileAdder.returnedValue = .success(())
-                    result = sut.initializeEnvironment()
+                    directoryAdder.errorToThrow = MockError()
                 }
                 
                 it("returns failure result") {
-                    expect(result.error).to(equal(.couldNotInitializeDirectory(".sbg/templates")))
+                    expect { try sut.initializeEnvironment() }.to(throwError(MockError()))
                 }
             }
             
             context("when adding file fails") {
-                var result: Result<Void, SBGEnvironmentInitializerError>!
-                
                 beforeEach {
-                    directoryAdder.returnedValue = .success(())
-                    fileAdder.returnedValue = .failure(FileAdderError.writingFailed("sample_file"))
-                    result = sut.initializeEnvironment()
+                    fileAdder.errorToThrow = MockError()
                 }
                 
                 it("returns failure result") {
-                    expect(result.error).to(equal(.couldNotAddFile("SBGFile")))
+                    expect { try sut.initializeEnvironment() }.to(throwError(MockError()))
                 }
             }
         }

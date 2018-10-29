@@ -17,18 +17,15 @@ final class GeneratorParser {
         self.fileReader = fileReader
     }
 
-    func parse(fromFileAt path: String) -> Result<Generator, GeneratorParserError> {
-        guard let content = fileReader.read(file: path) else {
-            return .failure(.cannotReadFile(path))
-        }
-
+    func parse(fromFileAt path: String) throws -> Generator {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
+        let content = try fileReader.read(file: path)
         guard let generator = try? decoder.decode(Generator.self, from: content) else {
-            return .failure(.cannotParseData(path))
+            throw GeneratorParserError.cannotParseData(path)
         }
 
-        return .success(generator)
+        return generator
     }
 }
