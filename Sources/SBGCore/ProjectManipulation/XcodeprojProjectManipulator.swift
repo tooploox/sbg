@@ -26,10 +26,12 @@ class XcodeprojProjectManipulator: ProjectManipulator {
         }
 
         let groupPathComponents = ArraySlice(groupPath.split(separator: "/").map(String.init))
-        guard let group = findGroup(withPath: groupPathComponents, rootGroup: rootGroup) else {
-            throw ProjectManipulatorError.cannotFindGroup(groupPath)
-        }
+        let group =  try findGroup(withPath: groupPathComponents, rootGroup: rootGroup)
 
+        // TODO: We should check if file exists earlier earlier
+        if group.file(named: fileName) != nil {
+            throw ProjectManipulatorError.fileAlreadyExists(fileName)
+        }
         let fileReference = try group.addFile(at: Path(filePath), sourceRoot: Path(""))
 
         guard let target = pbxproj.targets(named: targetName).first else {
@@ -45,17 +47,17 @@ class XcodeprojProjectManipulator: ProjectManipulator {
         try xcodeproj.write(path: Path(xcodeprojFile))
     }
 
-    private func findGroup(withPath path: ArraySlice<String>, rootGroup: PBXGroup) -> PBXGroup? {
+    private func findGroup(withPath path: ArraySlice<String>, rootGroup: PBXGroup) throws -> PBXGroup {
         guard let firstLevel = path.first else {
             return rootGroup
         }
 
         for group in rootGroup.children {
             if let group = group as? PBXGroup, let groupPath = group.path, groupPath == firstLevel {
-                return findGroup(withPath: path.dropFirst(), rootGroup: group)
+                return try findGroup(withPath: path.dropFirst(), rootGroup: group)
             }
         }
 
-        return nil
+        return try rootGroup.addGroup(named: firstLevel).last!
     }
 }

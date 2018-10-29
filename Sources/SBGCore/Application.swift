@@ -64,6 +64,7 @@ public class Application {
         let stepRunner = StepRunnerImpl(
             fileRenderer: fileRenderer,
             stringRenderer: stringRenderer,
+            directoryAdder: directoryAdder,
             fileAdder: fileAdder,
             projectManipulator: projectManipulator,
             xcodeprojFileNameProvider: xcodeprojFilenameProvider

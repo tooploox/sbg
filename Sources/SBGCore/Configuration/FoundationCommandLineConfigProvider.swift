@@ -44,7 +44,9 @@ final class FoundationCommandLineConfigProvider: CommandLineConfigurationProvide
         let commandName = parameters[1]
         var dictionary = [String: String]()
         _ = stride(from: minimumParametersCount, to: parameters.count, by: 2).map { index in
-            dictionary[parameters[index]] = parameters[index + 1]
+            let key = parameters[index].replacingOccurrences(of: "--", with: "")
+            let value = parameters[index + 1]
+            dictionary[key] = value
         }
         
         return CommandLineConfiguration(commandName: commandName, variables: dictionary)
