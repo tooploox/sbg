@@ -15,7 +15,7 @@ class XcodeprojProjectManipulator: ProjectManipulator {
     }
 
     func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
-        let filePath = pathResolver.createFinalPath(from: groupPath, name: fileName, fileExtension: "swift")
+        let filePath = pathResolver.createFinalPath(from: groupPath, name: fileName)
         let xcodeproj = try XcodeProj(pathString: xcodeprojFile)
         let pbxproj = xcodeproj.pbxproj
 
