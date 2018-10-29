@@ -7,17 +7,17 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class GeneratorRunnerTests: QuickSpec {
+class GeneratorRunnerImplTests: QuickSpec {
 
     override func spec() {
-        describe("GeneratorRunner") {
+        describe("GeneratorRunnerImpl") {
 
             var sut: GeneratorRunner!
             var stepRunner: MockStepRunner!
 
             beforeEach {
                 stepRunner = MockStepRunner()
-                sut = GeneratorRunner(stepRunner: stepRunner)
+                sut = GeneratorRunnerImpl(stepRunner: stepRunner)
             }
 
             context("when generator contains one step") {

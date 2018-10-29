@@ -7,15 +7,6 @@
 
 import Foundation
 
-enum SBGEnvironmentInitializerError: Error, Equatable {
-    case couldNotInitializeDirectory(String)
-    case couldNotAddFile(String)
-}
-
-protocol SBGEnvironmentInitializer {
-    func initializeEnvironment() throws
-}
-
 final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
     
     private let directoryAdder: DirectoryAdder

@@ -18,7 +18,7 @@ class StepRunnerImplTests: QuickSpec {
         var projectManipulator: MockProjectManipulator!
         var xcodeprojFileNameProvider: MockXcodeprojFileNameProvider!
 
-        describe("StepRunner") {
+        describe("StepRunnerImpl") {
             var step: Step!
             var parameters: [String: String]!
 

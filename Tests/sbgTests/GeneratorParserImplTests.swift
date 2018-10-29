@@ -7,17 +7,17 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class GeneratorParserTests: QuickSpec {
+class GeneratorParserImplTests: QuickSpec {
 
     override func spec() {
-        describe("GeneratorParser") {
+        describe("GeneratorParserImpl") {
 
             var fileReader: MockFileReader!
-            var sut: GeneratorParser!
+            var sut: GeneratorParserImpl!
 
             beforeEach {
                 fileReader = MockFileReader()
-                sut = GeneratorParser(fileReader: fileReader)
+                sut = GeneratorParserImpl(fileReader: fileReader)
             }
 
             context("when file reader throws error") {

@@ -4,6 +4,33 @@
 
 import Foundation
 
+enum ProjectManipulatorError: Error {
+    case cannotFindRootGroup
+    case cannotFindGroup(String)
+    case cannotFindTarget(String)
+    case cannotGetSourcesBuildPhase
+}
+
+protocol StringRenderer {
+    func render(string: String, context: [String: String]) throws -> String
+}
+
+protocol XcodeprojFileNameProvider {
+    func getXcodeprojFileName() throws -> String
+}
+
+public protocol FileRenderer {
+    func renderTemplate(name: String, context: [String: Any]?) throws -> String
+}
+
+protocol FileAdder {
+    func addFile(with name: String, content: String, to directory: String) throws
+}
+
+public protocol ProjectManipulator {
+    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws
+}
+
 final class StepRunnerImpl: StepRunner {
 
     private let fileRenderer: FileRenderer

@@ -4,14 +4,6 @@
 
 import Foundation
 
-protocol StringRenderer {
-    func render(string: String, context: [String: String]) throws -> String
-}
-
-protocol XcodeprojFileNameProvider {
-    func getXcodeprojFileName() throws -> String
-}
-
 protocol StepRunner {
     func run(step: Step, parameters: [String: String]) throws
 }
@@ -20,7 +12,7 @@ enum GeneratorRunnerError: Error {
     case noStepsDefined
 }
 
-final class GeneratorRunner {
+final class GeneratorRunnerImpl: GeneratorRunner {
 
     private let stepRunner: StepRunner
 

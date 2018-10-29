@@ -7,19 +7,19 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class ConfigProviderTests: QuickSpec {
+class ConfigurationProviderImplTests: QuickSpec {
 
     override func spec() {
-        describe("ConfigProvider") {
+        describe("ConfigurationProviderImpl") {
 
             var commandLineConfigProvider: MockCommandLineConfigProvider!
             var fileConfigProvider: MockFileConfigProvider!
-            var sut: ConfigProvider!
+            var sut: ConfigurationProviderImpl!
 
             beforeEach {
                 commandLineConfigProvider = MockCommandLineConfigProvider()
                 fileConfigProvider = MockFileConfigProvider()
-                sut = ConfigProvider(
+                sut = ConfigurationProviderImpl(
                     commandLineConfigProvider: commandLineConfigProvider,
                     fileConfigProvider: fileConfigProvider
                 )
@@ -67,7 +67,9 @@ class ConfigProviderTests: QuickSpec {
             context("when fileConfigProvider throws error") {
 
                 beforeEach {
-                    fileConfigProvider.errorToThrow = ConfigFileParserError.cannotReadFile(ConfigProvider.Constants.configFileName)
+                    fileConfigProvider.errorToThrow = ConfigFileParserError.cannotReadFile(
+                        ConfigurationProviderImpl.Constants.configFileName
+                    )
                     commandLineConfigProvider.returnedValue = CommandLineConfiguration(
                         commandName: "commandName",
                         variables: ["param2": "B", "param3": "B"]
@@ -75,7 +77,9 @@ class ConfigProviderTests: QuickSpec {
                 }
 
                 it("throws expected error") {
-                    let expectedError = ConfigFileParserError.cannotReadFile(ConfigProvider.Constants.configFileName)
+                    let expectedError = ConfigFileParserError.cannotReadFile(
+                        ConfigurationProviderImpl.Constants.configFileName
+                    )
                     expect { try sut.getConfiguration() }.to(throwError(expectedError))
                 }
             }
