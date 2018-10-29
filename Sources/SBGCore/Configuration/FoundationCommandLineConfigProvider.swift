@@ -21,13 +21,13 @@ enum CommandLineConfigProviderError: Error {
     case oddNumberOfArguments
 }
 
-final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
+final class FoundationCommandLineConfigProvider: CommandLineConfigurationProvider {
 
     private let minimumParametersCount = 2
     let commandLineParamsProvider: CommandLineParamsProvider
 
-    init(commandLineArgsProvider: CommandLineParamsProvider) {
-        self.commandLineParamsProvider = commandLineArgsProvider
+    init(commandLineParamsProvider: CommandLineParamsProvider) {
+        self.commandLineParamsProvider = commandLineParamsProvider
     }
     
     func getConfiguration() throws -> CommandLineConfiguration {

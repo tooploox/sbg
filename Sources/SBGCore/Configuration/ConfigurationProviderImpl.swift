@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol CommandLineConfigProvider {
+protocol CommandLineConfigurationProvider {
     func getConfiguration() throws -> CommandLineConfiguration
 }
 
@@ -28,10 +28,10 @@ final class ConfigurationProviderImpl: ConfigurationProvider {
         static let configFileName = "SBGConfig"
     }
 
-    private let commandLineConfigProvider: CommandLineConfigProvider
+    private let commandLineConfigProvider: CommandLineConfigurationProvider
     private let fileConfigProvider: FileConfigProvider
 
-    init(commandLineConfigProvider: CommandLineConfigProvider, fileConfigProvider: FileConfigProvider) {
+    init(commandLineConfigProvider: CommandLineConfigurationProvider, fileConfigProvider: FileConfigProvider) {
         self.commandLineConfigProvider = commandLineConfigProvider
         self.fileConfigProvider = fileConfigProvider
     }

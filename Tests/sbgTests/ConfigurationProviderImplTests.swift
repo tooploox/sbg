@@ -100,7 +100,7 @@ class ConfigurationProviderImplTests: QuickSpec {
     }
 }
 
-class MockCommandLineConfigProvider: CommandLineConfigProvider {
+class MockCommandLineConfigProvider: CommandLineConfigurationProvider {
 
     private(set) var invocationCount = 0
 

@@ -4,6 +4,10 @@
 
 import Foundation
 
+enum FileReaderError: Error {
+    case cannotCreateUrl(String)
+}
+
 protocol FileReader {
     func read(file: String) throws -> Data
 }

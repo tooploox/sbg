@@ -20,7 +20,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
 
             beforeEach {
                 commandLineParamsProvider = MockCommandLineParamsProvider()
-                sut = FoundationCommandLineConfigProvider(commandLineArgsProvider: commandLineParamsProvider)
+                sut = FoundationCommandLineConfigProvider(commandLineParamsProvider: commandLineParamsProvider)
             }
 
             context("commandLine parameters are empty") {
