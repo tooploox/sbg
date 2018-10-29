@@ -28,7 +28,7 @@ class ApplicationTests: QuickSpec {
                     projectManipulator: projectManipulator
                 )
 
-                fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
+                fileRenderer.valueToReturn = MockConstants.fileRendererReturnedValue
             }
 
             context("when generatorName is wrong") {
@@ -239,48 +239,4 @@ private struct MockConstants {
     static let fileRendererReturnedValue = "Lorem ipsum..."
 
     static let fileAdderPath = MockConstants.connectorDirectory + "/" + MockConstants.connectorName
-}
-
-private class MockFileRenderer: FileRenderer {
-
-    private(set) var name: String!
-    private(set) var invocationCount = 0
-
-    var renderingError: Error?
-    var returnedValue: String!
-
-    func renderTemplate(name: String, context: [String : Any]?) throws -> String {
-        self.name = name
-        invocationCount += 1
-        
-        if let error = renderingError {
-            throw error
-        }
-        
-        return returnedValue
-    }
-}
-
-private class MockProjectManipulator: ProjectManipulator {
-
-    private(set) var groupPath: String!
-    private(set) var fileName: String!
-    private(set) var xcodeprojFile: String!
-    private(set) var targetName: String!
-
-    private(set) var invocationCount = 0
-
-    var errorToThrow: Error?
-
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
-        self.groupPath = groupPath
-        self.fileName = fileName
-        self.xcodeprojFile = xcodeprojFile
-        self.targetName = targetName
-        invocationCount += 1
-
-        if let error = errorToThrow {
-            throw error
-        }
-    }
 }
