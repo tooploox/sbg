@@ -25,7 +25,7 @@ enum ConfigurationSource {
 final class ConfigurationProviderImpl: ConfigurationProvider {
 
     class Constants {
-        static let configFileName = "SBGConfig"
+        static let configFilePath = ".sbg/SBGConfig"
     }
 
     private let commandLineConfigProvider: CommandLineConfigurationProvider
@@ -41,7 +41,7 @@ final class ConfigurationProviderImpl: ConfigurationProvider {
         var variables = [String: String]()
 
         if source == .commandLineAndFile {
-            let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFileName)
+            let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFilePath)
             variables.append(fileConfig)
         }
 

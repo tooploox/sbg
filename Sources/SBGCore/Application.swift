@@ -86,12 +86,13 @@ public class Application {
     }
 
     public func run() throws {
-        let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
+        let commandName = try configurationProvider.getConfiguration(from: .commandLine).commandName
 
-        switch configuration.commandName {
+        switch commandName {
             case "init":
                 try environmentInitializer.initializeEnvironment()
             default:
+                let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
                 let generator = try generatorParser.parse(
                     fromFileAt: ".sbg/generators/\(configuration.commandName).json"
                 )

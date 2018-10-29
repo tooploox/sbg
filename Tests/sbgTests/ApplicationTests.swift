@@ -29,18 +29,21 @@ class ApplicationTests: QuickSpec {
                     generatorParser: generatorParser,
                     generatorRunner: generatorRunner
                 )
-                configurationProvider.configurationToReturn = SBGCore.Configuration(
-                    commandName: "init",
-                    variables: [:]
-                )
-            }
 
-            it("invokes configurationProvider exactly once") {
-                try! sut.run()
-                expect(configurationProvider.invocationCount).to(equal(1))
             }
-
             context("when configuration.command name is equal init") {
+
+                beforeEach {
+                    configurationProvider.configurationToReturn = SBGCore.Configuration(
+                        commandName: "init",
+                        variables: [:]
+                    )
+                }
+
+                it("invokes configurationProvider exactly once") {
+                    try! sut.run()
+                    expect(configurationProvider.invocationCount).to(equal(1))
+                }
 
                 it("invokes environmentInitializer exactly once") {
                     try! sut.run()
@@ -65,6 +68,11 @@ class ApplicationTests: QuickSpec {
                         variables: [:]
                     )
                     generatorParser.generatorToReturn = MockConstants.generator
+                }
+
+                it("invokes configurationProvider twice") {
+                    try! sut.run()
+                    expect(configurationProvider.invocationCount).to(equal(2))
                 }
 
                 context("and everything goes well") {
