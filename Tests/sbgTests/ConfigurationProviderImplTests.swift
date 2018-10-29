@@ -25,75 +25,124 @@ class ConfigurationProviderImplTests: QuickSpec {
                 )
             }
 
-            context("when commandLineConfigProvider and fileConfigProvider return disjoint sets of params") {
+            context("when commandLineAndFile source was specified") {
+                context("when commandLineConfigProvider and fileConfigProvider return disjoint sets of params") {
 
+                    beforeEach {
+                        commandLineConfigProvider.returnedValue = CommandLineConfiguration(
+                            commandName: "commandName",
+                            variables: ["param1": "value1"]
+                        )
+                        fileConfigProvider.returnedValue = ["param2": "value2"]
+                    }
+
+                    it("returned variables are sum of this sets") {
+                        let expectedResult = [
+                            "param1": "value1",
+                            "param2": "value2"
+                        ]
+                        expect {
+                            try sut.getConfiguration(from: .commandLineAndFile).variables
+                        }.to(equal(expectedResult))
+                    }
+                }
+
+                context("when commandLineConfigProvider and fileConfigProvider return not disjoint sets of params") {
+
+                    beforeEach {
+                        fileConfigProvider.returnedValue = ["param1": "A", "param2": "A"]
+                        commandLineConfigProvider.returnedValue = CommandLineConfiguration(
+                            commandName: "commandName",
+                            variables: ["param2": "B", "param3": "B"]
+                        )
+                    }
+
+                    it("returns values from commandLineConfigProvider for repeated keys") {
+                        let expectedResult = [
+                            "param1": "A",
+                            "param2": "B",
+                            "param3": "B"
+                        ]
+                        expect {
+                            try sut.getConfiguration(from: .commandLineAndFile).variables
+                        }.to(equal(expectedResult))
+                    }
+                }
+
+                context("when fileConfigProvider throws error") {
+
+                    beforeEach {
+                        fileConfigProvider.errorToThrow = MockError()
+                        commandLineConfigProvider.returnedValue = CommandLineConfiguration(
+                            commandName: "commandName",
+                            variables: ["param2": "B", "param3": "B"]
+                        )
+                    }
+
+                    it("throws expected error") {
+                        let expectedError = MockError()
+                        expect {
+                            try sut.getConfiguration(from: .commandLineAndFile)
+                        }.to(throwError(expectedError))
+                    }
+                }
+
+                context("when commandLineConfigProvider returns error") {
+
+                    beforeEach {
+                        fileConfigProvider.returnedValue = ["param1": "A", "param2": "A"]
+                        commandLineConfigProvider.errorToThrow = MockError()
+                    }
+
+                    it("throws expected error") {
+                        let expectedError = MockError()
+                        expect {
+                            try sut.getConfiguration(from: .commandLineAndFile)
+                        }.to(throwError(expectedError))
+                    }
+                }
+            }
+
+            context("when only commandLine source was specified") {
                 beforeEach {
                     commandLineConfigProvider.returnedValue = CommandLineConfiguration(
                         commandName: "commandName",
                         variables: ["param1": "value1"]
                     )
-                    fileConfigProvider.returnedValue = ["param2": "value2"]
                 }
 
-                it("returned variables are sum of this sets") {
-                    let expectedResult = [
-                        "param1": "value1",
-                        "param2": "value2"
-                    ]
-                    expect { try sut.getConfiguration().variables }.to(equal(expectedResult))
+                it("does not invoke fileConfigProvider") {
+                    try! sut.getConfiguration(from: .commandLine)
+                    expect(fileConfigProvider.invocationCount).to(equal(0))
                 }
-            }
 
-            context("when commandLineConfigProvider and fileConfigProvider return not disjoint sets of params") {
+                it("invokes commandLineConfigProvider exactly once") {
+                    try! sut.getConfiguration(from: .commandLine)
+                    expect(commandLineConfigProvider.invocationCount).to(equal(1))
+                }
 
-                beforeEach {
-                    fileConfigProvider.returnedValue = ["param1": "A", "param2": "A"]
-                    commandLineConfigProvider.returnedValue = CommandLineConfiguration(
+                it("returns expected value") {
+                    let expectedResult = SBGCore.Configuration(
                         commandName: "commandName",
-                        variables: ["param2": "B", "param3": "B"]
+                        variables: ["param1": "value1"]
                     )
+                    expect {
+                        try sut.getConfiguration(from: .commandLine)
+                    }.to(equal(expectedResult))
                 }
 
-                it("returns values from commandLineConfigProvider for repeated keys") {
-                    let expectedResult = [
-                        "param1": "A",
-                        "param2": "B",
-                        "param3": "B"
-                    ]
-                    expect { try sut.getConfiguration().variables }.to(equal(expectedResult))
-                }
-            }
+                context("and commandLineConfigProvider returns error") {
 
-            context("when fileConfigProvider throws error") {
+                    beforeEach {
+                        commandLineConfigProvider.errorToThrow = MockError()
+                    }
 
-                beforeEach {
-                    fileConfigProvider.errorToThrow = ConfigFileParserError.cannotReadFile(
-                        ConfigurationProviderImpl.Constants.configFileName
-                    )
-                    commandLineConfigProvider.returnedValue = CommandLineConfiguration(
-                        commandName: "commandName",
-                        variables: ["param2": "B", "param3": "B"]
-                    )
-                }
-
-                it("throws expected error") {
-                    let expectedError = ConfigFileParserError.cannotReadFile(
-                        ConfigurationProviderImpl.Constants.configFileName
-                    )
-                    expect { try sut.getConfiguration() }.to(throwError(expectedError))
-                }
-            }
-            
-            context("when commandLineConfigProvider returns error") {
-                
-                beforeEach {
-                    fileConfigProvider.returnedValue = ["param1": "A", "param2": "A"]
-                    commandLineConfigProvider.errorToThrow = CommandLineConfigProviderError.notEnoughArguments
-                }
-                
-                it("throws expected error") {
-                    let expectedError = CommandLineConfigProviderError.notEnoughArguments
-                    expect { try sut.getConfiguration() }.to(throwError(expectedError))
+                    it("throws expected error") {
+                        let expectedError = MockError()
+                        expect {
+                            try sut.getConfiguration(from: .commandLine)
+                        }.to(throwError(expectedError))
+                    }
                 }
             }
         }

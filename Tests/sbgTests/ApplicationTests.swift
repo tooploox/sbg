@@ -158,12 +158,15 @@ class MockSBGEnvironmentInitializer: SBGEnvironmentInitializer {
 
 class MockConfigurationProvider: ConfigurationProvider {
 
+    private(set) var source: ConfigurationSource!
+
     var invocationCount = 0
 
     var configurationToReturn: SBGCore.Configuration!
     var errorToThrow: Error?
 
-    func getConfiguration() throws -> SBGCore.Configuration {
+    func getConfiguration(from source: ConfigurationSource) throws -> SBGCore.Configuration {
+        self.source = source
         invocationCount += 1
 
         if let error = errorToThrow {

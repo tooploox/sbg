@@ -12,14 +12,14 @@ protocol FileConfigProvider {
     func getConfiguration(from file: String) throws -> [String: String]
 }
 
-struct Configuration {
+struct Configuration: Equatable {
     let commandName: String
     let variables: [String : String]
 }
 
-enum ConfigurationProviderError: Error, Equatable {
-    case cannotReadConfigurationFromFile(String)
-    case cannotReadCommandLineArguments
+enum ConfigurationSource {
+    case commandLine
+    case commandLineAndFile
 }
 
 final class ConfigurationProviderImpl: ConfigurationProvider {
@@ -36,11 +36,16 @@ final class ConfigurationProviderImpl: ConfigurationProvider {
         self.fileConfigProvider = fileConfigProvider
     }
 
-    func getConfiguration() throws -> Configuration {
-        let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFileName)
-        let commandLineConfig = try commandLineConfigProvider.getConfiguration()
+    func getConfiguration(from source: ConfigurationSource) throws -> Configuration {
 
-        var variables = fileConfig
+        var variables = [String: String]()
+
+        if source == .commandLineAndFile {
+            let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFileName)
+            variables.append(fileConfig)
+        }
+
+        let commandLineConfig = try commandLineConfigProvider.getConfiguration()
         variables.append(commandLineConfig.variables)
 
         return Configuration(

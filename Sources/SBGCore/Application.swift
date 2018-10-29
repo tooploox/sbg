@@ -13,7 +13,7 @@ protocol GeneratorParser {
 }
 
 protocol ConfigurationProvider {
-    func getConfiguration() throws -> Configuration
+    func getConfiguration(from source: ConfigurationSource) throws -> Configuration
 }
 
 protocol SBGEnvironmentInitializer {
@@ -86,7 +86,7 @@ public class Application {
     }
 
     public func run() throws {
-        let configuration = try configurationProvider.getConfiguration()
+        let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
 
         switch configuration.commandName {
             case "init":
