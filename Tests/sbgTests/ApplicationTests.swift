@@ -183,7 +183,7 @@ class MockGeneratorParser: GeneratorParser {
     var generatorToReturn: Generator!
     var errorToThrow: Error?
 
-    func parse(fromFileAt path: String) throws -> Generator {
+    func parseFile(atPath path: String) throws -> Generator {
         self.path = path
         invocationCount += 1
 

@@ -9,7 +9,7 @@ protocol GeneratorRunner {
 }
 
 protocol GeneratorParser {
-    func parse(fromFileAt path: String) throws -> Generator
+    func parseFile(atPath path: String) throws -> Generator
 }
 
 protocol ConfigurationProvider {
@@ -46,7 +46,7 @@ public class Application {
             case "init":
                 try environmentInitializer.initializeEnvironment()
             default:
-                let generator = try generatorParser.parse(fromFileAt: ".sbg/generators/\(configuration.commandName).json")
+                let generator = try generatorParser.parseFile(atPath: ".sbg/generators/\(configuration.commandName).json")
                 try generatorRunner.run(generator: generator, parameters: configuration.variables)
         }
     }
