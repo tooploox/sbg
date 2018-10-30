@@ -14,6 +14,7 @@ class StepRunnerImplTests: QuickSpec {
         var sut: StepRunner!
         var fileRenderer: MockFileRenderer!
         var stringRenderer: MockStringRenderer!
+        var directoryAdder: MockDirectoryAdder!
         var fileAdder: MockFileAdder!
         var projectManipulator: MockProjectManipulator!
         var xcodeprojFileNameProvider: MockXcodeprojFileNameProvider!
@@ -25,6 +26,7 @@ class StepRunnerImplTests: QuickSpec {
             beforeEach {
                 fileRenderer = MockFileRenderer()
                 stringRenderer = MockStringRenderer()
+                directoryAdder = MockDirectoryAdder()
                 fileAdder = MockFileAdder()
                 projectManipulator = MockProjectManipulator()
                 xcodeprojFileNameProvider = MockXcodeprojFileNameProvider()
@@ -32,6 +34,7 @@ class StepRunnerImplTests: QuickSpec {
                 sut = StepRunnerImpl(
                     fileRenderer: fileRenderer,
                     stringRenderer: stringRenderer,
+                    directoryAdder: directoryAdder,
                     fileAdder: fileAdder,
                     projectManipulator: projectManipulator,
                     xcodeprojFileNameProvider: xcodeprojFileNameProvider
@@ -62,7 +65,7 @@ class StepRunnerImplTests: QuickSpec {
                     }
 
                     it("with correct name") {
-                        expect(fileRenderer.name).to(equal(MockConstants.template))
+                        expect(fileRenderer.name).to(equal(".sbg/templates/\(MockConstants.template)"))
                     }
                 }
 

@@ -35,9 +35,8 @@ class GeneratorParserImplTests: QuickSpec {
                     fileReader.returnedValue = MockConstants.incorrectData
                 }
 
-                it("returns expected error") {
-                    let expectedError = GeneratorParserError.cannotParseData(MockConstants.filePath)
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(expectedError))
+                it("returns some error") {
+                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError())
                 }
             }
 
