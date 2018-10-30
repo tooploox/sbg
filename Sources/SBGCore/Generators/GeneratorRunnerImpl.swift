@@ -25,7 +25,7 @@ final class GeneratorRunnerImpl: GeneratorRunner {
             throw GeneratorRunnerError.noStepsDefined
         }
 
-        for step in generator.steps {
+        try generator.steps.forEach { step in
             try stepRunner.run(step: step, parameters: parameters)
         }
     }

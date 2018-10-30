@@ -12,7 +12,7 @@ final class GeneratorParserImpl: GeneratorParser {
         self.fileReader = fileReader
     }
 
-    func parse(fromFileAt path: String) throws -> Generator {
+    func parseFile(atPath path: String) throws -> Generator {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 

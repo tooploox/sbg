@@ -26,7 +26,7 @@ class GeneratorParserImplTests: QuickSpec {
                 }
 
                 it("returns expected error") {
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(MockError()))
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(throwError(MockError()))
                 }
             }
 
@@ -36,7 +36,7 @@ class GeneratorParserImplTests: QuickSpec {
                 }
 
                 it("returns some error") {
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError())
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(throwError())
                 }
             }
 
@@ -57,7 +57,7 @@ class GeneratorParserImplTests: QuickSpec {
                             )
                         ]
                     )
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(equal(expectedGenerator))
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(equal(expectedGenerator))
                 }
             }
         }
