@@ -17,17 +17,20 @@ class ApplicationTests: QuickSpec {
             var environmentInitializer: MockSBGEnvironmentInitializer!
             var generatorParser: MockGeneratorParser!
             var generatorRunner: MockGeneratorRunner!
+            var pathProvider: MockSBGPathProvider!
 
             beforeEach {
                 configurationProvider = MockConfigurationProvider()
                 environmentInitializer = MockSBGEnvironmentInitializer()
                 generatorParser = MockGeneratorParser()
                 generatorRunner = MockGeneratorRunner()
+                pathProvider = MockSBGPathProvider()
                 sut = Application(
                     configurationProvider: configurationProvider,
                     environmentInitializer: environmentInitializer,
                     generatorParser: generatorParser,
-                    generatorRunner: generatorRunner
+                    generatorRunner: generatorRunner,
+                    pathProvider: pathProvider
                 )
 
             }
@@ -68,6 +71,7 @@ class ApplicationTests: QuickSpec {
                         variables: [:]
                     )
                     generatorParser.generatorToReturn = MockConstants.generator
+                    pathProvider.generatorPathToReturn = MockConstants.generatorPath
                 }
 
                 it("invokes configurationProvider twice") {
@@ -90,8 +94,8 @@ class ApplicationTests: QuickSpec {
                             expect(generatorParser.invocationCount).to(equal(1))
                         }
 
-                        it("with correct file path") {
-                            expect(generatorParser.path).to(equal(".sbg/generators/notInit.json"))
+                        it("with generator file path equal path returned by path provider") {
+                            expect(generatorParser.path).to(equal(pathProvider.generatorPathToReturn))
                         }
                     }
 
@@ -147,6 +151,7 @@ class ApplicationTests: QuickSpec {
 
 private struct MockConstants {
     static let generator = Generator(name: "generator name", steps: [])
+    static let generatorPath = "generatorPath"
 }
 
 class MockSBGEnvironmentInitializer: SBGEnvironmentInitializer {

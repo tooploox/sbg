@@ -34,28 +34,29 @@ public protocol ProjectManipulator {
 
 final class StepRunnerImpl: StepRunner {
 
-    struct Constants {
-        static let templatesPath = ".sbg/templates/"
-    }
-
     private let fileRenderer: FileRenderer
     private let stringRenderer: StringRenderer
     private let fileAdder: FileAdder
     private let directoryAdder: DirectoryAdder
     private let projectManipulator: ProjectManipulator
     private let xcodeprojFileNameProvider: XcodeprojFileNameProvider
+    private let pathProvider: SBGPathProvider
 
-    init(fileRenderer: FileRenderer, stringRenderer: StringRenderer, directoryAdder: DirectoryAdder, fileAdder: FileAdder, projectManipulator: ProjectManipulator, xcodeprojFileNameProvider: XcodeprojFileNameProvider) {
+    init(fileRenderer: FileRenderer, stringRenderer: StringRenderer, fileAdder: FileAdder, directoryAdder: DirectoryAdder, projectManipulator: ProjectManipulator, xcodeprojFileNameProvider: XcodeprojFileNameProvider, pathProvider: SBGPathProvider) {
         self.fileRenderer = fileRenderer
         self.stringRenderer = stringRenderer
-        self.directoryAdder = directoryAdder
         self.fileAdder = fileAdder
+        self.directoryAdder = directoryAdder
         self.projectManipulator = projectManipulator
         self.xcodeprojFileNameProvider = xcodeprojFileNameProvider
+        self.pathProvider = pathProvider
     }
 
     func run(step: Step, parameters: [String: String]) throws {
-        let fileContent = try fileRenderer.renderTemplate(name: Constants.templatesPath + step.template, context: parameters)
+        let fileContent = try fileRenderer.renderTemplate(
+            name: pathProvider.templatePath(forTemplate: step.template),
+            context: parameters
+        )
         let fileName = try stringRenderer.render(string: step.fileName, context: parameters)
         let groupPath = try stringRenderer.render(string: step.group, context: parameters)
         let xcodeprojFileName = try xcodeprojFileNameProvider.getXcodeprojFileName()

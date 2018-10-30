@@ -24,16 +24,14 @@ enum ConfigurationSource {
 
 final class ConfigurationProviderImpl: ConfigurationProvider {
 
-    class Constants {
-        static let configFilePath = ".sbg/SBGConfig"
-    }
-
     private let commandLineConfigProvider: CommandLineConfigurationProvider
     private let fileConfigProvider: FileConfigProvider
+    private let pathProvider: SBGPathProvider
 
-    init(commandLineConfigProvider: CommandLineConfigurationProvider, fileConfigProvider: FileConfigProvider) {
+    init(commandLineConfigProvider: CommandLineConfigurationProvider, fileConfigProvider: FileConfigProvider, pathProvider: SBGPathProvider) {
         self.commandLineConfigProvider = commandLineConfigProvider
         self.fileConfigProvider = fileConfigProvider
+        self.pathProvider = pathProvider
     }
 
     func getConfiguration(from source: ConfigurationSource) throws -> Configuration {
@@ -41,7 +39,7 @@ final class ConfigurationProviderImpl: ConfigurationProvider {
         var variables = [String: String]()
 
         if source == .commandLineAndFile {
-            let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFilePath)
+            let fileConfig = try fileConfigProvider.getConfiguration(from: pathProvider.sbgConfigFilePath)
             variables.append(fileConfig)
         }
 

@@ -14,14 +14,17 @@ class ConfigurationProviderImplTests: QuickSpec {
 
             var commandLineConfigProvider: MockCommandLineConfigProvider!
             var fileConfigProvider: MockFileConfigProvider!
+            var pathProvider: MockSBGPathProvider!
             var sut: ConfigurationProviderImpl!
 
             beforeEach {
                 commandLineConfigProvider = MockCommandLineConfigProvider()
                 fileConfigProvider = MockFileConfigProvider()
+                pathProvider = MockSBGPathProvider()
                 sut = ConfigurationProviderImpl(
                     commandLineConfigProvider: commandLineConfigProvider,
-                    fileConfigProvider: fileConfigProvider
+                    fileConfigProvider: fileConfigProvider,
+                    pathProvider: pathProvider
                 )
             }
 

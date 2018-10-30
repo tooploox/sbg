@@ -20,6 +20,17 @@ protocol SBGEnvironmentInitializer {
     func initializeEnvironment() throws
 }
 
+protocol SBGPathProvider {
+    var templatesDirectoryPath: String { get }
+    var generatorsDirectoryPath : String { get }
+    var sbgConfigFilePath: String { get }
+    var sbgConfigName: String { get }
+    var sbgDirectoryPath: String { get }
+
+    func generatorPath(forCommand commandName: String) -> String
+    func templatePath(forTemplate templateName: String) -> String
+}
+
 enum SBGEnvironmentInitializerError: Error, Equatable {
     case couldNotInitializeDirectory(String)
     case couldNotAddFile(String)
@@ -31,8 +42,10 @@ public class Application {
     private let environmentInitializer: SBGEnvironmentInitializer
     private let generatorParser: GeneratorParser
     private let generatorRunner: GeneratorRunner
+    private let pathProvider: SBGPathProvider
 
     public static var `default`: Application = {
+        let pathProvider = SBGPathProviderImpl()
         let commandLineConfigProvider = FoundationCommandLineConfigProvider(
             commandLineParamsProvider: CommandLineParamsProviderImpl()
         )
@@ -40,7 +53,8 @@ public class Application {
         let fileConfigProvider = FoundationFileConfigProvider(fileReader: fileReader)
         let configurationProvider = ConfigurationProviderImpl(
             commandLineConfigProvider: commandLineConfigProvider,
-            fileConfigProvider: fileConfigProvider
+            fileConfigProvider: fileConfigProvider,
+            pathProvider: pathProvider
         )
 
         let directoryAdder = FoundationDirectoryAdder()
@@ -52,7 +66,8 @@ public class Application {
         )
         let environmentInitializer = FoundationSBGEnvironmentInitializer(
             directoryAdder: directoryAdder,
-            fileAdder: fileAdder
+            fileAdder: fileAdder,
+            pathProvider: pathProvider
         )
 
         let generatorParser = GeneratorParserImpl(fileReader: fileReader)
@@ -64,10 +79,11 @@ public class Application {
         let stepRunner = StepRunnerImpl(
             fileRenderer: fileRenderer,
             stringRenderer: stringRenderer,
-            directoryAdder: directoryAdder,
             fileAdder: fileAdder,
+            directoryAdder: directoryAdder,
             projectManipulator: projectManipulator,
-            xcodeprojFileNameProvider: xcodeprojFilenameProvider
+            xcodeprojFileNameProvider: xcodeprojFilenameProvider,
+            pathProvider: pathProvider
         )
         let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
 
@@ -75,15 +91,17 @@ public class Application {
             configurationProvider: configurationProvider,
             environmentInitializer: environmentInitializer,
             generatorParser: generatorParser,
-            generatorRunner: generatorRunner
+            generatorRunner: generatorRunner,
+            pathProvider: pathProvider
         )
     }()
 
-    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner) {
+    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, pathProvider: SBGPathProvider) {
         self.configurationProvider = configurationProvider
         self.environmentInitializer = environmentInitializer
         self.generatorParser = generatorParser
         self.generatorRunner = generatorRunner
+        self.pathProvider = pathProvider
     }
 
     public func run() throws {
@@ -95,7 +113,7 @@ public class Application {
             default:
                 let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
                 let generator = try generatorParser.parse(
-                    fromFileAt: ".sbg/generators/\(configuration.commandName).json"
+                    fromFileAt: pathProvider.generatorPath(forCommand: configuration.commandName)
                 )
                 try generatorRunner.run(generator: generator, parameters: configuration.variables)
         }
