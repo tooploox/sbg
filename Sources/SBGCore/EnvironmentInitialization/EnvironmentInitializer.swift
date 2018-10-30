@@ -29,6 +29,6 @@ final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
     func initializeEnvironment() throws {
         try directoryAdder.addDirectory(at: ".sbg/templates")
         try directoryAdder.addDirectory(at: ".sbg/generators")
-        try fileAdder.addFile(with: "SBGFile", content: "", to: ".sbg")
+        try fileAdder.addFile(with: "SBGFile", content: "{}", to: ".sbg")
     }
 }
