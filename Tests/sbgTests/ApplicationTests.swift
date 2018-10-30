@@ -13,210 +13,123 @@ class ApplicationTests: QuickSpec {
         describe("Application") {
 
             var sut: Application!
-            var fileRenderer: MockFileRenderer!
-            var fileAdder: MockFileAdder!
-            var projectManipulator: MockProjectManipulator!
-            var parameters: ApplicationParameters!
+            var configurationProvider: MockConfigurationProvider!
+            var environmentInitializer: MockSBGEnvironmentInitializer!
+            var generatorParser: MockGeneratorParser!
+            var generatorRunner: MockGeneratorRunner!
 
             beforeEach {
-                fileRenderer = MockFileRenderer()
-                fileAdder = MockFileAdder()
-                projectManipulator = MockProjectManipulator()
+                configurationProvider = MockConfigurationProvider()
+                environmentInitializer = MockSBGEnvironmentInitializer()
+                generatorParser = MockGeneratorParser()
+                generatorRunner = MockGeneratorRunner()
                 sut = Application(
-                    fileRenderer: fileRenderer,
-                    fileAdder: fileAdder,
-                    projectManipulator: projectManipulator
+                    configurationProvider: configurationProvider,
+                    environmentInitializer: environmentInitializer,
+                    generatorParser: generatorParser,
+                    generatorRunner: generatorRunner
                 )
-
-                fileRenderer.returnedValue = MockConstants.fileRendererReturnedValue
+                configurationProvider.configurationToReturn = SBGCore.Configuration(
+                    commandName: "init",
+                    variables: [:]
+                )
             }
 
-            context("when generatorName is wrong") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.wrongName,
-                        generatorParameters: [:]
-                    )
-                }
-
-                it("throws wrongGeneratorName error") {
-                    let expectedError = ApplicationError.wrongGeneratorName(MockConstants.wrongName)
-                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
-                }
+            it("invokes configurationProvider exactly once") {
+                try! sut.run()
+                expect(configurationProvider.invocationCount).to(equal(1))
             }
 
-            context("when flow_name parameter is missing") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target
-                        ]
-                    )
+            context("when configuration.command name is equal init") {
+
+                it("invokes environmentInitializer exactly once") {
+                    try! sut.run()
+                    expect(environmentInitializer.invocationCount).to(equal(1))
                 }
 
-                it("throws missingFlowName error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingFlowName))
+                context("and environmentInitializer throws error") {
+                    beforeEach {
+                        environmentInitializer.errorToThrow = MockError()
+                    }
+
+                    it("throws expected error") {
+                        expect { try sut.run() }.to(throwError(MockError()))
+                    }
                 }
             }
 
-            context("when connector directory path parameter is missing") {
+            context("when configuration.command name is not equal init") {
                 beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.flowName,
-                            Application.Constants.Keys.target: MockConstants.target
-                        ]
+                    configurationProvider.configurationToReturn = SBGCore.Configuration(
+                        commandName: "notInit",
+                        variables: [:]
                     )
+                    generatorParser.generatorToReturn = MockConstants.generator
                 }
 
-                it("throws missingConnectorDirectoryPath error") {
-                    let expectedError = ApplicationError.missingConnectorDirectoryPath
-                    expect { try sut.run(parameters: parameters) }.to(throwError(expectedError))
-                }
-            }
+                context("and everything goes well") {
 
-            context("when target parameter is missing") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.flowName,
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory
-                        ]
-                    )
-                }
-
-                it("throws missingTargetName error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingTargetName))
-                }
-            }
-            
-            context("when rendering fails") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target,
-                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
-                        ]
-                    )
-                    
-                    fileRenderer.renderingError = MockError()
-                }
-                
-                it("throws error from renderer error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
-                }
-            }
-            
-            context("when adding file fails") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target,
-                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
-                        ]
-                    )
-                    
-                    fileAdder.errorToThrow = MockError()
-                }
-                
-                it("throws couldNotAddFile error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(MockError()))
-                }
-            }
-            
-            context("when connector template path is missing") {
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.modulerName,
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target
-                        ]
-                    )
-                    
-                    fileRenderer.renderingError = MockError()
-                }
-                
-                it("throws missingTemplate error") {
-                    expect { try sut.run(parameters: parameters) }.to(throwError(ApplicationError.missingTemplate))
-                }
-            }
-
-            context("when parameters are correct") {
-
-                beforeEach {
-                    parameters = ApplicationParameters(
-                        generatorName: MockConstants.correctName,
-                        generatorParameters: [
-                            Application.Constants.Keys.moduleName: MockConstants.flowName,
-                            Application.Constants.Keys.connectorDirectoryPath: MockConstants.connectorDirectory,
-                            Application.Constants.Keys.target: MockConstants.target,
-                            Application.Constants.connectorTemplatePath: MockConstants.connectorTemplatePath
-                        ]
-                    )
-
-                    try! sut.run(parameters: parameters)
-                }
-
-                context("invokes file renderer"){
-
-                    it("exactly once") {
-                        expect(fileRenderer.invocationCount).to(equal(1))
+                    beforeEach {
+                        try! sut.run()
                     }
 
-                    it("name equal to MockConstants.connectorTemplatePath") {
-                        expect(fileRenderer.name).to(equal(MockConstants.connectorTemplatePath))
+                    it("environmentInitializer is not invoked") {
+                        expect(environmentInitializer.invocationCount).to(equal(0))
+                    }
+
+                    context("invokes generatorParser") {
+                        it("exactly once") {
+                            expect(generatorParser.invocationCount).to(equal(1))
+                        }
+
+                        it("with correct file path") {
+                            expect(generatorParser.path).to(equal(".sbg/generators/notInit.json"))
+                        }
+                    }
+
+                    context("invokes generatorRunner") {
+                        it("exactly once") {
+                            expect(generatorRunner.invocationCount).to(equal(1))
+                        }
+
+                        it("with generator equal generator returned by generatorParser") {
+                            expect(generatorRunner.generator).to(equal(generatorParser.generatorToReturn))
+                        }
+
+                        it("with parameters equal variables returned by configurationProvider") {
+                            expect(generatorRunner.parameters)
+                                .to(equal(configurationProvider.configurationToReturn.variables))
+                        }
                     }
                 }
 
-                context("invokes file adder") {
-                    it("exactly once") {
-                        expect(fileAdder.invocationCount).to(equal(1))
+                context("and configurationProvider throws error") {
+                    beforeEach {
+                        configurationProvider.errorToThrow = MockError()
                     }
 
-                    it("with name equal to MockConstants.connectorName") {
-                        expect(fileAdder.name).to(equal(MockConstants.connectorName))
-                    }
-
-                    it("with content equal to MockConstants.fileRendererReturnedValue") {
-                        expect(fileAdder.content).to(equal(MockConstants.fileRendererReturnedValue))
-                    }
-
-                    it("with directory equal to MockConstants.connectorDirectory") {
-                        expect(fileAdder.directory).to(equal(MockConstants.connectorDirectory))
+                    it("throws expected error") {
+                        expect { try sut.run() }.to(throwError(MockError()))
                     }
                 }
 
-                context("invokes project manipulator") {
-                    it("exactly once") {
-                        expect(projectManipulator.invocationCount).to(equal(1))
+                context("and generatorParser throws error") {
+                    beforeEach {
+                        generatorParser.errorToThrow = MockError()
                     }
 
-                    it("with groupPath equal to MockConstants.connectorDirectory") {
-                        expect(projectManipulator.groupPath).to(equal(MockConstants.connectorDirectory))
+                    it("throws expected error") {
+                        expect { try sut.run() }.to(throwError(MockError()))
+                    }
+                }
+
+                context("and generatorRunner throws error") {
+                    beforeEach {
+                        generatorRunner.errorToThrow = MockError()
                     }
 
-                    it("with fileName equal to MockConstants.connectorName") {
-                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
-                    }
-
-                    it("with fileName equal to MockConstants.connectorName") {
-                        expect(projectManipulator.fileName).to(equal(MockConstants.connectorName))
-                    }
-
-                    it("with target equal to MockConstants.target") {
-                        expect(projectManipulator.targetName).to(equal(MockConstants.target))
+                    it("throws expected error") {
+                        expect { try sut.run() }.to(throwError(MockError()))
                     }
                 }
             }
@@ -225,58 +138,75 @@ class ApplicationTests: QuickSpec {
 }
 
 private struct MockConstants {
-    static let correctName = Application.Constants.generatorName
-    static let wrongName = "wrongName"
-    static let flowName = "sampleName"
-    static let modulerName = "sampleName"
-
-    static let connectorTemplatePath = "connector_template_path"
-    static let connectorDirectory = "connector_directory"
-    static let connectorName = MockConstants.flowName + "Connector"
-
-    static let target = "Target"
-
-    static let fileRendererReturnedValue = "Lorem ipsum..."
-
-    static let fileAdderPath = MockConstants.connectorDirectory + "/" + MockConstants.connectorName
+    static let generator = Generator(name: "generator name", steps: [])
 }
 
-private class MockFileRenderer: FileRenderer {
+class MockSBGEnvironmentInitializer: SBGEnvironmentInitializer {
 
-    private(set) var name: String!
-    private(set) var invocationCount = 0
-
-    var renderingError: Error?
-    var returnedValue: String!
-
-    func renderTemplate(name: String, context: [String : Any]?) throws -> String {
-        self.name = name
-        invocationCount += 1
-        
-        if let error = renderingError {
-            throw error
-        }
-        
-        return returnedValue
-    }
-}
-
-private class MockProjectManipulator: ProjectManipulator {
-
-    private(set) var groupPath: String!
-    private(set) var fileName: String!
-    private(set) var xcodeprojFile: String!
-    private(set) var targetName: String!
-
-    private(set) var invocationCount = 0
+    var invocationCount = 0
 
     var errorToThrow: Error?
 
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws {
-        self.groupPath = groupPath
-        self.fileName = fileName
-        self.xcodeprojFile = xcodeprojFile
-        self.targetName = targetName
+    func initializeEnvironment() throws {
+        invocationCount += 1
+
+        if let error = errorToThrow {
+            throw error
+        }
+    }
+}
+
+class MockConfigurationProvider: ConfigurationProvider {
+
+    var invocationCount = 0
+
+    var configurationToReturn: SBGCore.Configuration!
+    var errorToThrow: Error?
+
+    func getConfiguration() throws -> SBGCore.Configuration {
+        invocationCount += 1
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        return configurationToReturn
+    }
+}
+
+class MockGeneratorParser: GeneratorParser {
+
+    private(set) var path: String!
+
+    var invocationCount = 0
+
+    var generatorToReturn: Generator!
+    var errorToThrow: Error?
+
+    func parseFile(atPath path: String) throws -> Generator {
+        self.path = path
+        invocationCount += 1
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        return generatorToReturn
+    }
+}
+
+class MockGeneratorRunner: GeneratorRunner {
+
+    private(set) var generator: Generator!
+    private(set) var parameters: [String: String]!
+
+    var invocationCount = 0
+
+    var errorToThrow: Error?
+
+    func run(generator: Generator, parameters: [String: String]) throws {
+        self.generator = generator
+        self.parameters = parameters
         invocationCount += 1
 
         if let error = errorToThrow {

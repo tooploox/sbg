@@ -7,17 +7,17 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class GeneratorParserTests: QuickSpec {
+class GeneratorParserImplTests: QuickSpec {
 
     override func spec() {
-        describe("GeneratorParser") {
+        describe("GeneratorParserImpl") {
 
             var fileReader: MockFileReader!
-            var sut: GeneratorParser!
+            var sut: GeneratorParserImpl!
 
             beforeEach {
                 fileReader = MockFileReader()
-                sut = GeneratorParser(fileReader: fileReader)
+                sut = GeneratorParserImpl(fileReader: fileReader)
             }
 
             context("when file reader throws error") {
@@ -26,7 +26,7 @@ class GeneratorParserTests: QuickSpec {
                 }
 
                 it("returns expected error") {
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(MockError()))
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(throwError(MockError()))
                 }
             }
 
@@ -37,7 +37,7 @@ class GeneratorParserTests: QuickSpec {
 
                 it("returns expected error") {
                     let expectedError = GeneratorParserError.cannotParseData(MockConstants.filePath)
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(throwError(expectedError))
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(throwError(expectedError))
                 }
             }
 
@@ -58,7 +58,7 @@ class GeneratorParserTests: QuickSpec {
                             )
                         ]
                     )
-                    expect { try sut.parse(fromFileAt: MockConstants.filePath) }.to(equal(expectedGenerator))
+                    expect { try sut.parseFile(atPath: MockConstants.filePath) }.to(equal(expectedGenerator))
                 }
             }
         }

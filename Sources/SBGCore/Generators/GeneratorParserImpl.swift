@@ -9,7 +9,7 @@ enum GeneratorParserError: Error, Equatable {
     case cannotParseData(String)
 }
 
-final class GeneratorParser {
+final class GeneratorParserImpl: GeneratorParser {
 
     private let fileReader: FileReader
 
@@ -17,7 +17,7 @@ final class GeneratorParser {
         self.fileReader = fileReader
     }
 
-    func parse(fromFileAt path: String) throws -> Generator {
+    func parseFile(atPath path: String) throws -> Generator {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 

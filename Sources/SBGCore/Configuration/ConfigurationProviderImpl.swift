@@ -17,12 +17,12 @@ struct Configuration {
     let variables: [String : String]
 }
 
-enum ConfigProviderError: Error, Equatable {
+enum ConfigurationProviderError: Error, Equatable {
     case cannotReadConfigurationFromFile(String)
     case cannotReadCommandLineArguments
 }
 
-final class ConfigProvider {
+final class ConfigurationProviderImpl: ConfigurationProvider {
 
     class Constants {
         static let configFileName = "SBGConfig"
