@@ -17,6 +17,6 @@ class SBGPathProviderImpl: SBGPathProvider {
     }
 
     func templatePath(forTemplate templateName: String) -> String {
-        return templatesDirectoryPath + templateName
+        return "\(templatesDirectoryPath)/\(templateName)"
     }
 }

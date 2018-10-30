@@ -43,7 +43,7 @@ class XcodeprojProjectManipulator: ProjectManipulator {
             throw ProjectManipulatorError.cannotGetSourcesBuildPhase
         }
 
-        try buildPhase.add(file: fileReference)
+        _ = try buildPhase.add(file: fileReference)
         try xcodeproj.write(path: Path(xcodeprojFile))
     }
 
