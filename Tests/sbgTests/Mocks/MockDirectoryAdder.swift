@@ -10,16 +10,16 @@ import Foundation
 
 class MockDirectoryAdder: DirectoryAdder {
     
-    private(set) var path: String!
+    private(set) var paths = [String]()
     private(set) var invocationCount = 0
 
-    var errorToThrow: Error?
+    var errorsToThrow = [Error]()
 
     func addDirectory(at path: String) throws {
         invocationCount += 1
-        self.path = path
+        paths.append(path)
 
-        if let error = errorToThrow {
+        if let error = errorsToThrow[safe: invocationCount-1] {
             throw error
         }
     }

@@ -106,15 +106,15 @@ class StepRunnerImplTests: QuickSpec {
                     }
 
                     it("with correct name") {
-                        expect(fileAdder.name).to(equal(MockConstants.stringRendererReturnedString))
+                        expect(fileAdder.names).to(equal([MockConstants.stringRendererReturnedString]))
                     }
 
                     it("with content equal to string returned by file renderer") {
-                        expect(fileAdder.content).to(equal(fileRenderer.valueToReturn))
+                        expect(fileAdder.contentsArray).to(equal([fileRenderer.valueToReturn]))
                     }
 
                     it("with directory equal to value returned by string renderer") {
-                        expect(fileAdder.directory).to(equal(MockConstants.stringRendererReturnedString))
+                        expect(fileAdder.directories).to(equal([MockConstants.stringRendererReturnedString]))
                     }
                 }
 
