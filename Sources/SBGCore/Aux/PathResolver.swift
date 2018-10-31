@@ -8,12 +8,12 @@
 import Foundation
 
 protocol PathResolver {
-    func createFinalPath(from directory: String, name: String, fileExtension: String) -> String
+    func createFinalPath(from directory: String, name: String) -> String
 }
 
 final class FoundationPathResolver: PathResolver {
     
-    func createFinalPath(from directory: String, name: String, fileExtension: String) -> String {
+    func createFinalPath(from directory: String, name: String) -> String {
         var finalPath = ""
         
         finalPath.append(directory)
@@ -23,12 +23,6 @@ final class FoundationPathResolver: PathResolver {
         }
         
         finalPath.append(name)
-        
-        if !fileExtension.starts(with: ".") {
-            finalPath.append(".")
-        }
-        
-        finalPath.append(fileExtension)
         
         return finalPath
     }

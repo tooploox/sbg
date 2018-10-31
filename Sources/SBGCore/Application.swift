@@ -4,81 +4,118 @@
 
 import Foundation
 
-public protocol FileRenderer {
-    func renderTemplate(name: String, context: [String: Any]?) throws -> String
+protocol GeneratorRunner {
+    func run(generator: Generator, parameters: [String: String]) throws
 }
 
-protocol FileAdder {
-    func addFile(with name: String, content: String, to directory: String) throws
+protocol GeneratorParser {
+    func parseFile(atPath path: String) throws -> Generator
 }
 
-public protocol ProjectManipulator {
-    func addFileToXCodeProject(groupPath: String, fileName: String, xcodeprojFile: String, target targetName: String) throws
+protocol ConfigurationProvider {
+    func getConfiguration(from source: ConfigurationSource) throws -> Configuration
 }
 
-public enum ProjectManipulatorError: Error {
-    case cannotOpenXcodeproj(String)
-    case cannotFindRootGroup
-    case cannotAddFileToGroup(String, String)
-    case cannotFindGroup(String)
-    case cannotFindTarget(String)
-    case cannotGetSourcesBuildPhase
-    case cannotAddFileToSourcesBuildPhase(String)
-    case cannotWriteXcodeprojFile
+protocol SBGEnvironmentInitializer {
+    func initializeEnvironment() throws
+}
+
+protocol SBGPathProvider {
+    var templatesDirectoryPath: String { get }
+    var generatorsDirectoryPath : String { get }
+    var sbgConfigFilePath: String { get }
+    var sbgConfigName: String { get }
+    var sbgDirectoryPath: String { get }
+
+    func generatorPath(forCommand commandName: String) -> String
+    func templatePath(forTemplate templateName: String) -> String
+}
+
+enum SBGEnvironmentInitializerError: Error, Equatable {
+    case couldNotInitializeDirectory(String)
+    case couldNotAddFile(String)
 }
 
 public class Application {
 
-    struct Constants {
-        static let generatorName = "cleanmodule"
-        static let connectorTemplatePath = "connector_template_path"
+    private let configurationProvider: ConfigurationProvider
+    private let environmentInitializer: SBGEnvironmentInitializer
+    private let generatorParser: GeneratorParser
+    private let generatorRunner: GeneratorRunner
+    private let pathProvider: SBGPathProvider
 
-        struct Keys {
-            static let moduleName = "module_name"
-            static let connectorDirectoryPath = "connector_directory"
-            static let target = "target"
-        }
-    }
-
-    private let fileRenderer: FileRenderer
-    private let fileAdder: FileAdder
-    private let projectManipulator: ProjectManipulator
-
-    init(fileRenderer: FileRenderer, fileAdder: FileAdder, projectManipulator: ProjectManipulator) {
-        self.fileRenderer = fileRenderer
-        self.fileAdder = fileAdder
-        self.projectManipulator = projectManipulator
-    }
-
-    func run(parameters: ApplicationParameters) throws {
-        guard parameters.generatorName == Constants.generatorName else {
-            throw ApplicationError.wrongGeneratorName(parameters.generatorName)
-        }
-
-        guard let flowName = parameters.generatorParameters[Constants.Keys.moduleName] else {
-            throw ApplicationError.missingFlowName
-        }
-        
-        guard let connectorDirectoryPath = parameters.generatorParameters[Constants.Keys.connectorDirectoryPath] else {
-            throw ApplicationError.missingConnectorDirectoryPath
-        }
-
-        guard let target = parameters.generatorParameters[Constants.Keys.target] else {
-            throw ApplicationError.missingTargetName
-        }
-        
-        guard let template = parameters.generatorParameters[Constants.connectorTemplatePath] else {
-            throw ApplicationError.missingTemplate
-        }
-
-        let connectorFile = try fileRenderer.renderTemplate(name: template , context: parameters.generatorParameters)
-        try fileAdder.addFile(with: flowName + "Connector", content: connectorFile, to: connectorDirectoryPath)
-        
-        try projectManipulator.addFileToXCodeProject(
-            groupPath: Constants.Keys.connectorDirectoryPath,
-            fileName: flowName + "Connector",
-            xcodeprojFile: "Some project file",
-            target: target
+    public static var `default`: Application = {
+        let pathProvider = SBGPathProviderImpl()
+        let commandLineConfigProvider = FoundationCommandLineConfigProvider(
+            commandLineParamsProvider: CommandLineParamsProviderImpl()
         )
+        let fileReader = FoundationFileReader()
+        let fileConfigProvider = FoundationFileConfigProvider(fileReader: fileReader)
+        let configurationProvider = ConfigurationProviderImpl(
+            commandLineConfigProvider: commandLineConfigProvider,
+            fileConfigProvider: fileConfigProvider,
+            pathProvider: pathProvider
+        )
+
+        let directoryAdder = FoundationDirectoryAdder()
+        let pathResolver = FoundationPathResolver()
+        let stringWriter = FoundationStringWriter()
+        let fileAdder = FoundationFileAdder(
+            pathResolver: pathResolver,
+            stringWriter: stringWriter
+        )
+        let environmentInitializer = FoundationSBGEnvironmentInitializer(
+            directoryAdder: directoryAdder,
+            fileAdder: fileAdder,
+            pathProvider: pathProvider
+        )
+
+        let generatorParser = GeneratorParserImpl(fileReader: fileReader)
+
+        let fileRenderer = StencilFileRenderer()
+        let stringRenderer = StencilStringRenderer()
+        let projectManipulator = XcodeprojProjectManipulator(pathResolver: pathResolver)
+        let xcodeprojFilenameProvider = XcodeprojFileNameProviderImpl()
+        let stepRunner = StepRunnerImpl(
+            fileRenderer: fileRenderer,
+            stringRenderer: stringRenderer,
+            fileAdder: fileAdder,
+            directoryAdder: directoryAdder,
+            projectManipulator: projectManipulator,
+            xcodeprojFileNameProvider: xcodeprojFilenameProvider,
+            pathProvider: pathProvider
+        )
+        let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
+
+        return Application(
+            configurationProvider: configurationProvider,
+            environmentInitializer: environmentInitializer,
+            generatorParser: generatorParser,
+            generatorRunner: generatorRunner,
+            pathProvider: pathProvider
+        )
+    }()
+
+    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, pathProvider: SBGPathProvider) {
+        self.configurationProvider = configurationProvider
+        self.environmentInitializer = environmentInitializer
+        self.generatorParser = generatorParser
+        self.generatorRunner = generatorRunner
+        self.pathProvider = pathProvider
+    }
+
+    public func run() throws {
+        let commandName = try configurationProvider.getConfiguration(from: .commandLine).commandName
+
+        switch commandName {
+            case "init":
+                try environmentInitializer.initializeEnvironment()
+            default:
+                let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
+                let generator = try generatorParser.parseFile(
+                    atPath: pathProvider.generatorPath(forCommand: configuration.commandName)
+                )
+                try generatorRunner.run(generator: generator, parameters: configuration.variables)
+        }
     }
 }

@@ -22,7 +22,7 @@ final class FoundationFileAdder: FileAdder {
     }
 
     func addFile(with name: String, content: String, to directory: String) throws {
-        let path = pathResolver.createFinalPath(from: directory, name: name, fileExtension: "swift")
+        let path = pathResolver.createFinalPath(from: directory, name: name)
         try stringWriter.write(string: content, to: path)
     }
 }
