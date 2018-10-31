@@ -4,7 +4,7 @@
 
 import Foundation
 
-public class ApplicationBuilder {
+final public class ApplicationBuilder {
 
     public func build() -> Application {
         let pathProvider = SBGPathProviderImpl()

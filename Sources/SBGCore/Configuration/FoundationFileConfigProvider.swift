@@ -13,7 +13,7 @@ enum ConfigFileParserError: Error, Equatable {
     case cannotParseData(Data)
 }
 
-class FoundationFileConfigProvider: FileConfigProvider {
+final class FoundationFileConfigProvider: FileConfigProvider {
 
     private let fileReader: FileReader
 

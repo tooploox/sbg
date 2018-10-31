@@ -4,7 +4,7 @@
 
 import Foundation
 
-class FoundationStringWriter: StringWriter {
+final class FoundationStringWriter: StringWriter {
     func write(string: String, to filePath: String) throws {
         try string.write(toFile: filePath, atomically: false, encoding: .utf8)
     }

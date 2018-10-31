@@ -36,7 +36,7 @@ enum SBGEnvironmentInitializerError: Error, Equatable {
     case couldNotAddFile(String)
 }
 
-public class Application {
+final public class Application {
 
     private let configurationProvider: ConfigurationProvider
     private let environmentInitializer: SBGEnvironmentInitializer

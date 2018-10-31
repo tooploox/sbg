@@ -4,7 +4,7 @@
 
 import Foundation
 
-class CommandLineParamsProviderImpl: CommandLineParamsProvider {
+final class CommandLineParamsProviderImpl: CommandLineParamsProvider {
 
     var parameters: [String] {
         return CommandLine.arguments
