@@ -29,7 +29,8 @@ final public class ApplicationBuilder {
         let environmentInitializer = FoundationSBGEnvironmentInitializer(
             directoryAdder: directoryAdder,
             fileAdder: fileAdder,
-            pathProvider: pathProvider
+            pathProvider: pathProvider,
+            filesContentProvider: DemoFilesContentProvider()
         )
 
         let generatorParser = GeneratorParserImpl(fileReader: fileReader)

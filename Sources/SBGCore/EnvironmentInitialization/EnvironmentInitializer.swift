@@ -18,9 +18,9 @@ final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
     private let directoryAdder: DirectoryAdder
     private let fileAdder: FileAdder
     private let pathProvider: SBGPathProvider
-    private var filesContentProvider: FilesContentProvider?
+    private var filesContentProvider: FilesContentProvider
 
-    init(directoryAdder: DirectoryAdder, fileAdder: FileAdder, pathProvider: SBGPathProvider, filesContentProvider: FilesContentProvider? = nil) {
+    init(directoryAdder: DirectoryAdder, fileAdder: FileAdder, pathProvider: SBGPathProvider, filesContentProvider: FilesContentProvider) {
         self.directoryAdder = directoryAdder
         self.fileAdder = fileAdder
         self.pathProvider = pathProvider
@@ -28,10 +28,6 @@ final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
     }
 
     func initializeEnvironment() throws {
-        guard let filesContentProvider = filesContentProvider else {
-            return
-        }
-
         try directoryAdder.addDirectory(at: pathProvider.templatesDirectoryPath)
         try directoryAdder.addDirectory(at: pathProvider.generatorsDirectoryPath)
         try fileAdder.addFile(with: pathProvider.sbgConfigName, content: filesContentProvider.sbgConfigFileContent, to: pathProvider.sbgDirectoryPath)
