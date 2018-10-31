@@ -1,6 +1,7 @@
 import SBGCore
 
-let app = Application.default
+let appBuilder = ApplicationBuilder()
+let app = appBuilder.build()
 do {
     try app.run()
 } catch {
