@@ -13,11 +13,22 @@ protocol GeneratorParser {
 }
 
 protocol ConfigurationProvider {
-    func getConfiguration() throws -> Configuration
+    func getConfiguration(from source: ConfigurationSource) throws -> Configuration
 }
 
 protocol SBGEnvironmentInitializer {
     func initializeEnvironment() throws
+}
+
+protocol SBGPathProvider {
+    var templatesDirectoryPath: String { get }
+    var generatorsDirectoryPath : String { get }
+    var sbgConfigFilePath: String { get }
+    var sbgConfigName: String { get }
+    var sbgDirectoryPath: String { get }
+
+    func generatorPath(forCommand commandName: String) -> String
+    func templatePath(forTemplate templateName: String) -> String
 }
 
 enum SBGEnvironmentInitializerError: Error, Equatable {
@@ -31,22 +42,79 @@ public class Application {
     private let environmentInitializer: SBGEnvironmentInitializer
     private let generatorParser: GeneratorParser
     private let generatorRunner: GeneratorRunner
+    private let pathProvider: SBGPathProvider
 
-    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner) {
+    public static var `default`: Application = {
+        let pathProvider = SBGPathProviderImpl()
+        let commandLineConfigProvider = FoundationCommandLineConfigProvider(
+            commandLineParamsProvider: CommandLineParamsProviderImpl()
+        )
+        let fileReader = FoundationFileReader()
+        let fileConfigProvider = FoundationFileConfigProvider(fileReader: fileReader)
+        let configurationProvider = ConfigurationProviderImpl(
+            commandLineConfigProvider: commandLineConfigProvider,
+            fileConfigProvider: fileConfigProvider,
+            pathProvider: pathProvider
+        )
+
+        let directoryAdder = FoundationDirectoryAdder()
+        let pathResolver = FoundationPathResolver()
+        let stringWriter = FoundationStringWriter()
+        let fileAdder = FoundationFileAdder(
+            pathResolver: pathResolver,
+            stringWriter: stringWriter
+        )
+        let environmentInitializer = FoundationSBGEnvironmentInitializer(
+            directoryAdder: directoryAdder,
+            fileAdder: fileAdder,
+            pathProvider: pathProvider
+        )
+
+        let generatorParser = GeneratorParserImpl(fileReader: fileReader)
+
+        let fileRenderer = StencilFileRenderer()
+        let stringRenderer = StencilStringRenderer()
+        let projectManipulator = XcodeprojProjectManipulator(pathResolver: pathResolver)
+        let xcodeprojFilenameProvider = XcodeprojFileNameProviderImpl()
+        let stepRunner = StepRunnerImpl(
+            fileRenderer: fileRenderer,
+            stringRenderer: stringRenderer,
+            fileAdder: fileAdder,
+            directoryAdder: directoryAdder,
+            projectManipulator: projectManipulator,
+            xcodeprojFileNameProvider: xcodeprojFilenameProvider,
+            pathProvider: pathProvider
+        )
+        let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
+
+        return Application(
+            configurationProvider: configurationProvider,
+            environmentInitializer: environmentInitializer,
+            generatorParser: generatorParser,
+            generatorRunner: generatorRunner,
+            pathProvider: pathProvider
+        )
+    }()
+
+    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, pathProvider: SBGPathProvider) {
         self.configurationProvider = configurationProvider
         self.environmentInitializer = environmentInitializer
         self.generatorParser = generatorParser
         self.generatorRunner = generatorRunner
+        self.pathProvider = pathProvider
     }
 
-    func run() throws {
-        let configuration = try configurationProvider.getConfiguration()
+    public func run() throws {
+        let commandName = try configurationProvider.getConfiguration(from: .commandLine).commandName
 
-        switch configuration.commandName {
+        switch commandName {
             case "init":
                 try environmentInitializer.initializeEnvironment()
             default:
-                let generator = try generatorParser.parseFile(atPath: ".sbg/generators/\(configuration.commandName).json")
+                let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
+                let generator = try generatorParser.parseFile(
+                    atPath: pathProvider.generatorPath(forCommand: configuration.commandName)
+                )
                 try generatorRunner.run(generator: generator, parameters: configuration.variables)
         }
     }

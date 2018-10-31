@@ -45,10 +45,6 @@ class FoundationFileAdderTests: QuickSpec {
                     it("invokes path resolver with correct directory") {
                         expect(pathResolver.directory).to(equal(MockConstants.sampleDirectory))
                     }
-
-                    it("invokes path resolver with correct file extension") {
-                        expect(pathResolver.fileExtension).to(equal(MockConstants.correctFileExtension))
-                    }
                 }
 
                 context("when string writer fails") {

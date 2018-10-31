@@ -21,13 +21,13 @@ enum CommandLineConfigProviderError: Error {
     case oddNumberOfArguments
 }
 
-final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
+final class FoundationCommandLineConfigProvider: CommandLineConfigurationProvider {
 
     private let minimumParametersCount = 2
     let commandLineParamsProvider: CommandLineParamsProvider
 
-    init(commandLineArgsProvider: CommandLineParamsProvider) {
-        self.commandLineParamsProvider = commandLineArgsProvider
+    init(commandLineParamsProvider: CommandLineParamsProvider) {
+        self.commandLineParamsProvider = commandLineParamsProvider
     }
     
     func getConfiguration() throws -> CommandLineConfiguration {
@@ -44,7 +44,9 @@ final class FoundationCommandLineConfigProvider: CommandLineConfigProvider {
         let commandName = parameters[1]
         var dictionary = [String: String]()
         _ = stride(from: minimumParametersCount, to: parameters.count, by: 2).map { index in
-            dictionary[parameters[index]] = parameters[index + 1]
+            let key = parameters[index].replacingOccurrences(of: "--", with: "")
+            let value = parameters[index + 1]
+            dictionary[key] = value
         }
         
         return CommandLineConfiguration(commandName: commandName, variables: dictionary)

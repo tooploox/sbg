@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol CommandLineConfigProvider {
+protocol CommandLineConfigurationProvider {
     func getConfiguration() throws -> CommandLineConfiguration
 }
 
@@ -12,35 +12,38 @@ protocol FileConfigProvider {
     func getConfiguration(from file: String) throws -> [String: String]
 }
 
-struct Configuration {
+struct Configuration: Equatable {
     let commandName: String
     let variables: [String : String]
 }
 
-enum ConfigurationProviderError: Error, Equatable {
-    case cannotReadConfigurationFromFile(String)
-    case cannotReadCommandLineArguments
+enum ConfigurationSource {
+    case commandLine
+    case commandLineAndFile
 }
 
 final class ConfigurationProviderImpl: ConfigurationProvider {
 
-    class Constants {
-        static let configFileName = "SBGConfig"
-    }
-
-    private let commandLineConfigProvider: CommandLineConfigProvider
+    private let commandLineConfigProvider: CommandLineConfigurationProvider
     private let fileConfigProvider: FileConfigProvider
+    private let pathProvider: SBGPathProvider
 
-    init(commandLineConfigProvider: CommandLineConfigProvider, fileConfigProvider: FileConfigProvider) {
+    init(commandLineConfigProvider: CommandLineConfigurationProvider, fileConfigProvider: FileConfigProvider, pathProvider: SBGPathProvider) {
         self.commandLineConfigProvider = commandLineConfigProvider
         self.fileConfigProvider = fileConfigProvider
+        self.pathProvider = pathProvider
     }
 
-    func getConfiguration() throws -> Configuration {
-        let fileConfig = try fileConfigProvider.getConfiguration(from: Constants.configFileName)
-        let commandLineConfig = try commandLineConfigProvider.getConfiguration()
+    func getConfiguration(from source: ConfigurationSource) throws -> Configuration {
 
-        var variables = fileConfig
+        var variables = [String: String]()
+
+        if source == .commandLineAndFile {
+            let fileConfig = try fileConfigProvider.getConfiguration(from: pathProvider.sbgConfigFilePath)
+            variables.append(fileConfig)
+        }
+
+        let commandLineConfig = try commandLineConfigProvider.getConfiguration()
         variables.append(commandLineConfig.variables)
 
         return Configuration(

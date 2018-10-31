@@ -14,9 +14,11 @@ class StepRunnerImplTests: QuickSpec {
         var sut: StepRunner!
         var fileRenderer: MockFileRenderer!
         var stringRenderer: MockStringRenderer!
+        var directoryAdder: MockDirectoryAdder!
         var fileAdder: MockFileAdder!
         var projectManipulator: MockProjectManipulator!
         var xcodeprojFileNameProvider: MockXcodeprojFileNameProvider!
+        var pathProvider: MockSBGPathProvider!
 
         describe("StepRunnerImpl") {
             var step: Step!
@@ -25,16 +27,20 @@ class StepRunnerImplTests: QuickSpec {
             beforeEach {
                 fileRenderer = MockFileRenderer()
                 stringRenderer = MockStringRenderer()
+                directoryAdder = MockDirectoryAdder()
                 fileAdder = MockFileAdder()
                 projectManipulator = MockProjectManipulator()
                 xcodeprojFileNameProvider = MockXcodeprojFileNameProvider()
+                pathProvider = MockSBGPathProvider()
 
                 sut = StepRunnerImpl(
                     fileRenderer: fileRenderer,
                     stringRenderer: stringRenderer,
                     fileAdder: fileAdder,
+                    directoryAdder: directoryAdder,
                     projectManipulator: projectManipulator,
-                    xcodeprojFileNameProvider: xcodeprojFileNameProvider
+                    xcodeprojFileNameProvider: xcodeprojFileNameProvider,
+                    pathProvider: pathProvider
                 )
 
                 step = Step(
@@ -47,6 +53,7 @@ class StepRunnerImplTests: QuickSpec {
                 fileRenderer.valueToReturn = MockConstants.fileRendererReturnedString
                 stringRenderer.valueToReturn = MockConstants.stringRendererReturnedString
                 xcodeprojFileNameProvider.fileNameToReturn = MockConstants.xcodeprojFileNameProviderReturnedString
+                pathProvider.templatePathToReturn = MockConstants.templatePath
             }
 
             context("when everything goes well") {
@@ -61,8 +68,8 @@ class StepRunnerImplTests: QuickSpec {
                         expect(fileRenderer.invocationCount).to(equal(1))
                     }
 
-                    it("with correct name") {
-                        expect(fileRenderer.name).to(equal(MockConstants.template))
+                    it("with name equal path returned by path provider") {
+                        expect(fileRenderer.name).to(equal(pathProvider.templatePathToReturn))
                     }
                 }
 
@@ -207,4 +214,5 @@ private class MockConstants {
     static let fileRendererReturnedString = "some string"
     static let stringRendererReturnedString = "some string"
     static let xcodeprojFileNameProviderReturnedString = "xcodeproj name"
+    static let templatePath = "templatePath"
 }

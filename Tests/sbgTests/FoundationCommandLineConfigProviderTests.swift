@@ -20,7 +20,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
 
             beforeEach {
                 commandLineParamsProvider = MockCommandLineParamsProvider()
-                sut = FoundationCommandLineConfigProvider(commandLineArgsProvider: commandLineParamsProvider)
+                sut = FoundationCommandLineConfigProvider(commandLineParamsProvider: commandLineParamsProvider)
             }
 
             context("commandLine parameters are empty") {
@@ -80,7 +80,7 @@ class FoundationCommandLineConfigProviderTests: QuickSpec {
                 }
                 
                 it("returns expected variables") {
-                    expect { try sut.getConfiguration().variables }.to(equal(["--config": "config.json", "--filePath": "filePath", "--name": "Name"]))
+                    expect { try sut.getConfiguration().variables }.to(equal(["config": "config.json", "filePath": "filePath", "name": "Name"]))
                 }
             }
         }

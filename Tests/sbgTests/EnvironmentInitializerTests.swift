@@ -16,13 +16,19 @@ class SBGEnvironmentInitializerTests: QuickSpec {
         describe("SBGEnvironmentInitializer") {
             var directoryAdder: MockDirectoryAdder!
             var fileAdder: MockFileAdder!
+            var pathProvider: MockSBGPathProvider!
             var sut: FoundationSBGEnvironmentInitializer!
             
             beforeEach {
                 directoryAdder = MockDirectoryAdder()
                 fileAdder = MockFileAdder()
+                pathProvider = MockSBGPathProvider()
 
-                sut = FoundationSBGEnvironmentInitializer(directoryAdder: directoryAdder, fileAdder: fileAdder)
+                sut = FoundationSBGEnvironmentInitializer(
+                    directoryAdder: directoryAdder,
+                    fileAdder: fileAdder,
+                    pathProvider: pathProvider
+                )
             }
             
             context("when directory adding and file adding succeeds") {

@@ -4,11 +4,6 @@
 
 import Foundation
 
-enum GeneratorParserError: Error, Equatable {
-    case cannotReadFile(String)
-    case cannotParseData(String)
-}
-
 final class GeneratorParserImpl: GeneratorParser {
 
     private let fileReader: FileReader
@@ -22,10 +17,6 @@ final class GeneratorParserImpl: GeneratorParser {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         let content = try fileReader.read(file: path)
-        guard let generator = try? decoder.decode(Generator.self, from: content) else {
-            throw GeneratorParserError.cannotParseData(path)
-        }
-
-        return generator
+        return try decoder.decode(Generator.self, from: content)
     }
 }
