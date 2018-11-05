@@ -75,16 +75,22 @@ class StepRunnerImplTests: QuickSpec {
 
                 context("invokes string renderer") {
 
-                    it("twice") {
-                        expect(stringRenderer.invocationCount).to(equal(2))
+                    it("three times") {
+                        expect(stringRenderer.invocationCount).to(equal(3))
                     }
 
                     it("with correct strings") {
-                        expect(stringRenderer.stringArray).to(equal([MockConstants.filename, MockConstants.group]))
+                        let expectedStrings = [
+                            MockConstants.filename,
+                            MockConstants.group,
+                            MockConstants.target
+                        ]
+                        expect(stringRenderer.stringArray).to(equal(expectedStrings))
                     }
 
                     it("with correct contexts") {
                         let expectedContextArray: [[String: String]] = [
+                            [:],
                             [:],
                             [:]
                         ]
@@ -136,8 +142,8 @@ class StepRunnerImplTests: QuickSpec {
                             .to(equal(MockConstants.xcodeprojFileNameProviderReturnedString))
                     }
 
-                    it("with target equal to MockConstants.target") {
-                        expect(projectManipulator.targetName).to(equal(MockConstants.target))
+                    it("with target equal to value returned by string renderer") {
+                        expect(projectManipulator.targetName).to(equal(MockConstants.stringRendererReturnedString))
                     }
                 }
             }
