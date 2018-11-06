@@ -13,7 +13,7 @@ protocol FilesContentProvider {
     var generatorsFiles: [String: String] { get }
 }
 
-final class FoundationSBGEnvironmentInitializer: SBGEnvironmentInitializer {
+final class SBGEnvironmentInitializerImpl: SBGEnvironmentInitializer {
     
     private let directoryAdder: DirectoryAdder
     private let fileAdder: FileAdder

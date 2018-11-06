@@ -26,7 +26,7 @@ final class ApplicationBuilder {
             pathResolver: pathResolver,
             stringWriter: stringWriter
         )
-        let environmentInitializer = FoundationSBGEnvironmentInitializer(
+        let environmentInitializer = SBGEnvironmentInitializerImpl(
             directoryAdder: directoryAdder,
             fileAdder: fileAdder,
             pathProvider: pathProvider,

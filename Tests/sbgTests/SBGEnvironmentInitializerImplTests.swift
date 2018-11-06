@@ -10,15 +10,15 @@ import Quick
 import Nimble
 @testable import SBGCore
 
-class SBGEnvironmentInitializerTests: QuickSpec {
+class SBGEnvironmentInitializerImplTests: QuickSpec {
     
     override func spec() {
-        describe("SBGEnvironmentInitializer") {
+        describe("SBGEnvironmentInitializerImpl") {
             var directoryAdder: MockDirectoryAdder!
             var fileAdder: MockFileAdder!
             var pathProvider: MockSBGPathProvider!
             var fileContentProvider: FakeFilesContentProvider!
-            var sut: FoundationSBGEnvironmentInitializer!
+            var sut: SBGEnvironmentInitializerImpl!
             
             beforeEach {
                 directoryAdder = MockDirectoryAdder()
@@ -26,7 +26,7 @@ class SBGEnvironmentInitializerTests: QuickSpec {
                 pathProvider = MockSBGPathProvider()
                 fileContentProvider = FakeFilesContentProvider()
 
-                sut = FoundationSBGEnvironmentInitializer(
+                sut = SBGEnvironmentInitializerImpl(
                     directoryAdder: directoryAdder,
                     fileAdder: fileAdder,
                     pathProvider: pathProvider,
@@ -58,7 +58,7 @@ class SBGEnvironmentInitializerTests: QuickSpec {
                 }
 
                 describe("fileAdder") {
-                    it("is invoked three times") {
+                    it("is invoked four times") {
                         expect(fileAdder.invocationCount).to(equal(4))
                     }
 
