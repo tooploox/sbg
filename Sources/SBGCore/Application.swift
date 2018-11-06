@@ -44,6 +44,10 @@ final public class Application {
     private let generatorRunner: GeneratorRunner
     private let pathProvider: SBGPathProvider
 
+    public var `default`: Application {
+        return ApplicationBuilder().build()
+    }
+
     init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, pathProvider: SBGPathProvider) {
         self.configurationProvider = configurationProvider
         self.environmentInitializer = environmentInitializer

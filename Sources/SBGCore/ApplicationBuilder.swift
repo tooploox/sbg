@@ -4,9 +4,9 @@
 
 import Foundation
 
-final public class ApplicationBuilder {
+final class ApplicationBuilder {
 
-    public func build() -> Application {
+    func build() -> Application {
         let pathProvider = SBGPathProviderImpl()
         let commandLineConfigProvider = FoundationCommandLineConfigProvider(
             commandLineParamsProvider: CommandLineParamsProviderImpl()
@@ -57,9 +57,5 @@ final public class ApplicationBuilder {
             generatorRunner: generatorRunner,
             pathProvider: pathProvider
         )
-    }
-
-    public init() {
-
     }
 }
