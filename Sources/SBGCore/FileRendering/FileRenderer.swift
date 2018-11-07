@@ -7,7 +7,7 @@
 
 import Stencil
 
-class StencilFileRenderer: FileRenderer {
+final class StencilFileRenderer: FileRenderer {
     func renderTemplate(name: String, context: [String: Any]?) throws -> String {
         return try Environment(loader: FileSystemLoader(paths: ["."])).renderTemplate(name: name, context: context)
     }

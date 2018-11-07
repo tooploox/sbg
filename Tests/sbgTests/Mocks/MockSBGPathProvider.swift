@@ -7,11 +7,11 @@ import Foundation
 
 class MockSBGPathProvider: SBGPathProvider {
 
-    private(set) var templatesDirectoryPath: String = ""
-    private(set) var generatorsDirectoryPath: String = ""
-    private(set) var sbgConfigFilePath: String = ""
-    private(set) var sbgConfigName: String = ""
-    private(set) var sbgDirectoryPath: String = ""
+    var templatesDirectoryPath: String = ""
+    var generatorsDirectoryPath: String = ""
+    var sbgConfigFilePath: String = ""
+    var sbgConfigName: String = ""
+    var sbgDirectoryPath: String = ""
 
     var generatorPathToReturn: String?
     var templatePathToReturn: String?
