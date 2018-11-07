@@ -44,7 +44,7 @@ final public class Application {
     private let generatorRunner: GeneratorRunner
     private let pathProvider: SBGPathProvider
 
-    public var `default`: Application {
+    public static var `default`: Application {
         return ApplicationBuilder().build()
     }
 
