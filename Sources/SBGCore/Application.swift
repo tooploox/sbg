@@ -42,6 +42,7 @@ public class Application {
     private let environmentInitializer: SBGEnvironmentInitializer
     private let generatorParser: GeneratorParser
     private let generatorRunner: GeneratorRunner
+    private let helpPrinter: HelpPrinter
     private let pathProvider: SBGPathProvider
 
     public static var `default`: Application = {
@@ -86,21 +87,25 @@ public class Application {
             pathProvider: pathProvider
         )
         let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
+        let helpTextsProvider = HelpTextsProviderImpl()
+        let helpPrinter = HelpPrinterImpl(helpTextsProvider: helpTextsProvider)
 
         return Application(
             configurationProvider: configurationProvider,
             environmentInitializer: environmentInitializer,
             generatorParser: generatorParser,
             generatorRunner: generatorRunner,
+            helpPrinter: helpPrinter,
             pathProvider: pathProvider
         )
     }()
 
-    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, pathProvider: SBGPathProvider) {
+    init(configurationProvider: ConfigurationProvider, environmentInitializer: SBGEnvironmentInitializer, generatorParser: GeneratorParser, generatorRunner: GeneratorRunner, helpPrinter: HelpPrinter, pathProvider: SBGPathProvider) {
         self.configurationProvider = configurationProvider
         self.environmentInitializer = environmentInitializer
         self.generatorParser = generatorParser
         self.generatorRunner = generatorRunner
+        self.helpPrinter = helpPrinter
         self.pathProvider = pathProvider
     }
 
@@ -110,6 +115,8 @@ public class Application {
         switch commandName {
             case "init":
                 try environmentInitializer.initializeEnvironment()
+            case "help":
+                helpPrinter.printHelp()
             default:
                 let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
                 let generator = try generatorParser.parseFile(

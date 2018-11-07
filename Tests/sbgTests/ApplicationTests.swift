@@ -17,6 +17,7 @@ class ApplicationTests: QuickSpec {
             var environmentInitializer: MockSBGEnvironmentInitializer!
             var generatorParser: MockGeneratorParser!
             var generatorRunner: MockGeneratorRunner!
+            var helpPrinter: MockHelpPrinter!
             var pathProvider: MockSBGPathProvider!
 
             beforeEach {
@@ -24,12 +25,14 @@ class ApplicationTests: QuickSpec {
                 environmentInitializer = MockSBGEnvironmentInitializer()
                 generatorParser = MockGeneratorParser()
                 generatorRunner = MockGeneratorRunner()
+                helpPrinter = MockHelpPrinter()
                 pathProvider = MockSBGPathProvider()
                 sut = Application(
                     configurationProvider: configurationProvider,
                     environmentInitializer: environmentInitializer,
                     generatorParser: generatorParser,
                     generatorRunner: generatorRunner,
+                    helpPrinter: helpPrinter,
                     pathProvider: pathProvider
                 )
 
@@ -61,6 +64,25 @@ class ApplicationTests: QuickSpec {
                     it("throws expected error") {
                         expect { try sut.run() }.to(throwError(MockError()))
                     }
+                }
+            }
+            
+            context("when configuration.command name is equal help") {
+                beforeEach {
+                    configurationProvider.configurationToReturn = SBGCore.Configuration(
+                        commandName: "help",
+                        variables: [:]
+                    )
+                    
+                    try! sut.run()
+                }
+                
+                it("invokes configurationProvider exactly once") {
+                    expect(configurationProvider.invocationCount).to(equal(1))
+                }
+                
+                it("invokes helpPrinter exactly once") {
+                    expect(helpPrinter.invocationCount).to(equal(1))
                 }
             }
 
