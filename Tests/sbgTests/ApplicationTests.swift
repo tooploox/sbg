@@ -86,7 +86,7 @@ class ApplicationTests: QuickSpec {
                 }
             }
 
-            context("when configuration.command name is not equal init") {
+            context("when configuration.command name is not equal init or help") {
                 beforeEach {
                     configurationProvider.configurationToReturn = SBGCore.Configuration(
                         commandName: "notInit",

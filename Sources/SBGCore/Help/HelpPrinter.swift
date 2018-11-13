@@ -13,13 +13,13 @@ protocol HelpPrinter {
 
 final class HelpPrinterImpl: HelpPrinter {
     
-    private let helpTextsProvider: HelpTextsProvider
+    private let helpContentProvider: HelpContentProvider
     
-    init(helpTextsProvider: HelpTextsProvider) {
-        self.helpTextsProvider = helpTextsProvider
+    init(helpContentProvider: HelpContentProvider) {
+        self.helpContentProvider = helpContentProvider
     }
     
     func printHelp() {
-        print(helpTextsProvider.generalHelp)
+        print(helpContentProvider.generalHelp)
     }
 }

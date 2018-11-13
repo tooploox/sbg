@@ -87,8 +87,8 @@ public class Application {
             pathProvider: pathProvider
         )
         let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
-        let helpTextsProvider = HelpTextsProviderImpl()
-        let helpPrinter = HelpPrinterImpl(helpTextsProvider: helpTextsProvider)
+        let helpContentProvider = HelpContentProviderImpl()
+        let helpPrinter = HelpPrinterImpl(helpContentProvider: helpContentProvider)
 
         return Application(
             configurationProvider: configurationProvider,
@@ -119,10 +119,16 @@ public class Application {
                 helpPrinter.printHelp()
             default:
                 let configuration = try configurationProvider.getConfiguration(from: .commandLineAndFile)
-                let generator = try generatorParser.parseFile(
-                    atPath: pathProvider.generatorPath(forCommand: configuration.commandName)
-                )
-                try generatorRunner.run(generator: generator, parameters: configuration.variables)
+                
+                do {
+                    let generator = try generatorParser.parseFile(
+                        atPath: pathProvider.generatorPath(forCommand: configuration.commandName)
+                    )
+                    try generatorRunner.run(generator: generator, parameters: configuration.variables)
+                } catch {
+                    helpPrinter.printHelp()
+                    throw error
+                }
         }
     }
 }
