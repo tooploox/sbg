@@ -155,6 +155,11 @@ class ApplicationTests: QuickSpec {
                     it("throws expected error") {
                         expect { try sut.run() }.to(throwError(MockError()))
                     }
+                    
+                    it("invokes help printer exactly once") {
+                        try? sut.run()
+                        expect(helpPrinter.invocationCount).to(equal(1))
+                    }
                 }
 
                 context("and generatorRunner throws error") {
@@ -164,6 +169,11 @@ class ApplicationTests: QuickSpec {
 
                     it("throws expected error") {
                         expect { try sut.run() }.to(throwError(MockError()))
+                    }
+                    
+                    it("invokes help printer exactly once") {
+                        try? sut.run()
+                        expect(helpPrinter.invocationCount).to(equal(1))
                     }
                 }
             }
