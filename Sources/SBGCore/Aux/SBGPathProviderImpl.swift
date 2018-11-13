@@ -4,7 +4,7 @@
 
 import Foundation
 
-class SBGPathProviderImpl: SBGPathProvider {
+final class SBGPathProviderImpl: SBGPathProvider {
 
     let templatesDirectoryPath = ".sbg/templates"
     let generatorsDirectoryPath  = ".sbg/generators"

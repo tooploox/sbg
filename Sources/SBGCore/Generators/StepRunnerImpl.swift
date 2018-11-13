@@ -59,6 +59,7 @@ final class StepRunnerImpl: StepRunner {
         )
         let fileName = try stringRenderer.render(string: step.fileName, context: parameters)
         let groupPath = try stringRenderer.render(string: step.group, context: parameters)
+        let target = try stringRenderer.render(string: step.target, context: parameters)
         let xcodeprojFileName = try xcodeprojFileNameProvider.getXcodeprojFileName()
 
         try directoryAdder.addDirectory(at: groupPath)
@@ -67,7 +68,7 @@ final class StepRunnerImpl: StepRunner {
             groupPath: groupPath,
             fileName: fileName,
             xcodeprojFile: xcodeprojFileName,
-            target: step.target
+            target: target
         )
     }
 }

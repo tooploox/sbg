@@ -75,16 +75,22 @@ class StepRunnerImplTests: QuickSpec {
 
                 context("invokes string renderer") {
 
-                    it("twice") {
-                        expect(stringRenderer.invocationCount).to(equal(2))
+                    it("three times") {
+                        expect(stringRenderer.invocationCount).to(equal(3))
                     }
 
                     it("with correct strings") {
-                        expect(stringRenderer.stringArray).to(equal([MockConstants.filename, MockConstants.group]))
+                        let expectedStrings = [
+                            MockConstants.filename,
+                            MockConstants.group,
+                            MockConstants.target
+                        ]
+                        expect(stringRenderer.stringArray).to(equal(expectedStrings))
                     }
 
                     it("with correct contexts") {
                         let expectedContextArray: [[String: String]] = [
+                            [:],
                             [:],
                             [:]
                         ]
@@ -106,15 +112,15 @@ class StepRunnerImplTests: QuickSpec {
                     }
 
                     it("with correct name") {
-                        expect(fileAdder.name).to(equal(MockConstants.stringRendererReturnedString))
+                        expect(fileAdder.names).to(equal([MockConstants.stringRendererReturnedString]))
                     }
 
                     it("with content equal to string returned by file renderer") {
-                        expect(fileAdder.content).to(equal(fileRenderer.valueToReturn))
+                        expect(fileAdder.contentsArray).to(equal([fileRenderer.valueToReturn]))
                     }
 
                     it("with directory equal to value returned by string renderer") {
-                        expect(fileAdder.directory).to(equal(MockConstants.stringRendererReturnedString))
+                        expect(fileAdder.directories).to(equal([MockConstants.stringRendererReturnedString]))
                     }
                 }
 
@@ -136,8 +142,8 @@ class StepRunnerImplTests: QuickSpec {
                             .to(equal(MockConstants.xcodeprojFileNameProviderReturnedString))
                     }
 
-                    it("with target equal to MockConstants.target") {
-                        expect(projectManipulator.targetName).to(equal(MockConstants.target))
+                    it("with target equal to value returned by string renderer") {
+                        expect(projectManipulator.targetName).to(equal(MockConstants.stringRendererReturnedString))
                     }
                 }
             }

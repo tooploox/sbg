@@ -4,7 +4,7 @@
 
 import Foundation
 
-class FoundationFileReader: FileReader {
+final class FoundationFileReader: FileReader {
 
     func read(file: String) throws -> Data {
         return try Data(contentsOf: URL(fileURLWithPath: file))
