@@ -49,12 +49,15 @@ final class ApplicationBuilder {
             pathProvider: pathProvider
         )
         let generatorRunner = GeneratorRunnerImpl(stepRunner: stepRunner)
-
+        let helpContentProvider = HelpContentProviderImpl()
+        let helpPrinter = HelpPrinterImpl(helpContentProvider: helpContentProvider)
+        
         return Application(
             configurationProvider: configurationProvider,
             environmentInitializer: environmentInitializer,
             generatorParser: generatorParser,
             generatorRunner: generatorRunner,
+            helpPrinter: helpPrinter,
             pathProvider: pathProvider
         )
     }
