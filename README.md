@@ -6,7 +6,7 @@ Swift boilerplate generator is a command line tool which helps reducing unnecess
 - [Installation](#installation)
 - [Usage](#usage)
   - [Init](#Init)
-  - [Command Line](#Command Line)
+  - [Command Line](#Command&#32;Line)
   - [SBGConfig](#SBGConfig)
   - [Generators](#Generators)
   - [Templates](#Templates)
@@ -39,7 +39,7 @@ $ brew install tooploox/sbg/sbg
 
   It will create `.sbg` catalog with `SBGConfig` file inside. Under `.sbg` it also creates catalogs `templates` and `generators` with example files inside.
 
-- ### Command Line
+- ### Command&#32;Line
 
   Usage of SBG is pretty simple. It has only 2 commands. One described above and second one is running generator. Syntax is:
 
