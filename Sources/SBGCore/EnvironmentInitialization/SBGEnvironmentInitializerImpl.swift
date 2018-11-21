@@ -37,5 +37,7 @@ final class SBGEnvironmentInitializerImpl: SBGEnvironmentInitializer {
         try filesContentProvider.generatorsFiles.forEach { key, value in
             try fileAdder.addFile(with: key, content: value, to: pathProvider.generatorsDirectoryPath)
         }
+        
+        print("Environment initialized properly.")
     }
 }

@@ -31,11 +31,6 @@ protocol SBGPathProvider {
     func templatePath(forTemplate templateName: String) -> String
 }
 
-enum SBGEnvironmentInitializerError: Error, Equatable {
-    case couldNotInitializeDirectory(String)
-    case couldNotAddFile(String)
-}
-
 final public class Application {
 
     private let configurationProvider: ConfigurationProvider

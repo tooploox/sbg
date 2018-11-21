@@ -11,7 +11,6 @@ protocol CommandLineParamsProvider {
 }
 
 struct CommandLineConfiguration {
-    
     let commandName: String
     let variables: [String : String]
 }
@@ -19,6 +18,17 @@ struct CommandLineConfiguration {
 enum CommandLineConfigProviderError: Error {
     case notEnoughArguments
     case oddNumberOfArguments
+}
+
+extension CommandLineConfigProviderError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+            case .notEnoughArguments:
+                return "Not enough arguments"
+            case .oddNumberOfArguments:
+                return "Odd number of arguments"
+        }
+    }
 }
 
 final class FoundationCommandLineConfigProvider: CommandLineConfigurationProvider {
