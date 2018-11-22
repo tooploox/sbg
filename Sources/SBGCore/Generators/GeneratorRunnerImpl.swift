@@ -12,6 +12,15 @@ enum GeneratorRunnerError: Error {
     case noStepsDefined
 }
 
+extension GeneratorRunnerError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+            case .noStepsDefined:
+                return "Generator does not have any steps"
+        }
+    }
+}
+
 final class GeneratorRunnerImpl: GeneratorRunner {
 
     private let stepRunner: StepRunner
@@ -25,8 +34,10 @@ final class GeneratorRunnerImpl: GeneratorRunner {
             throw GeneratorRunnerError.noStepsDefined
         }
 
-        try generator.steps.forEach { step in
+        try generator.steps.enumerated().forEach { index, step in
             try stepRunner.run(step: step, parameters: parameters)
+
+            print("Succesfully finished \(index + 1) out of \(generator.steps.count) steps.")
         }
     }
 }

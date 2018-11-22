@@ -12,6 +12,23 @@ enum ProjectManipulatorError: Error {
     case fileAlreadyExists(String)
 }
 
+extension ProjectManipulatorError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+            case .cannotFindRootGroup:
+                return "The root group could not be found"
+            case .cannotFindGroup(let groupName):
+                return "Group \(groupName) cound not be found"
+            case .cannotFindTarget(let targetName):
+                return "Target \(targetName) could not be found"
+            case .cannotGetSourcesBuildPhase:
+                return "Build phase could not be obtained"
+            case .fileAlreadyExists(let fileName):
+                return "File \(fileName) already exists"
+        }
+    }
+}
+
 protocol StringRenderer {
     func render(string: String, context: [String: String]) throws -> String
 }

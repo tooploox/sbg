@@ -13,6 +13,17 @@ enum ConfigFileParserError: Error, Equatable {
     case cannotParseData(Data)
 }
 
+extension ConfigFileParserError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+            case .cannotParseData(_):
+                return "Configuration file has invalid format"
+            case .cannotReadFile(let fileName):
+                return "Could not read file \(fileName)"
+        }
+    }
+}
+
 final class FoundationFileConfigProvider: FileConfigProvider {
 
     private let fileReader: FileReader
